@@ -4,24 +4,25 @@
 // https://opensource.org/licenses/MIT
 
 #pragma once
-#include <variant>
+#include <any>
 #include "cdscript.hpp"
 namespace cdscript
 {
 using token_t = int32_t;
 struct Token
 {
-    enum type
+    enum Type
     {
-        Integer = 256, // <integer>
-        Number,        // <number>
-        String,        // <string>
-        EndOfFile,     // <EOF>
+        First = 256,
+        Integer,   // <integer>
+        Number,    // <number>
+        String,    // <string>
+        EndOfFile, // <EOF>
     };
-    token_t token = 0;
+    token_t type = 0;
     size_t line = 0;
     size_t column = 0;
-    std::variant<integer_t, number_t, std::string> value;
+    std::any value;
 };
 
 } // namespace cdscript

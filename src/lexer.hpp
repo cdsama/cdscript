@@ -5,17 +5,45 @@
 
 #pragma once
 #include "token.hpp"
-#include <istream>
+#include <sstream>
 
 namespace cdscript
 {
 
+namespace exception
+{
+class LexerError : public std::exception
+{
+  public:
+    LexerError(std::string &&info) noexcept
+    {
+        ss += info;
+    }
+
+    template <typename T>
+    LexerError &operator<<(T t) noexcept
+    {
+        std::ostringstream os;
+        os << t;
+        ss += os.str();
+        return *this;
+    }
+
+    virtual const char *what() const noexcept override
+    {
+        return ss.c_str();
+    }
+    std::string ss;
+};
+
+} // namespace exception
+
 class Lexer
 {
   public:
-    virtual ~Lexer() {}
-    virtual token_t GetToken(Token &token) = 0;
-    static std::unique_ptr<Lexer> GetLexer(std::istream &code);
+    virtual ~Lexer(){};
+    [[nodiscard]] virtual Token GetToken() = 0;
+    [[nodiscard]] static std::unique_ptr<Lexer> GetLexer(std::istream &code);
 };
 
 } // namespace cdscript
