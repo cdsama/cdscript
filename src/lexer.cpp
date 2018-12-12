@@ -80,8 +80,8 @@ class LexerImpl : public Lexer
             return EOF;
         }
         char next;
-        code >> next;
-        std::cout << current << std::endl;
+        code.read(&next, sizeof(next));
+        column++;
         return next;
     }
 
@@ -102,6 +102,7 @@ class LexerImpl : public Lexer
 
     Token SingleLineStringToken()
     {
+        std::cout<<"SingleLineStringToken()"<<std::endl;
         auto quote = current;
         current = Next();
         buffer.clear();
@@ -118,8 +119,8 @@ class LexerImpl : public Lexer
                 throw exception::LexerError("incomplete string at this line: ") << line;
             }
 
-            current = Next();
             buffer.push_back(current);
+            current = Next();
         }
 
         current = Next();
