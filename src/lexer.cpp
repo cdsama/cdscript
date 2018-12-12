@@ -131,7 +131,6 @@ class LexerImpl : public Lexer
 
     Token SingleLineStringToken()
     {
-        std::cout << "SingleLineStringToken()" << std::endl;
         auto quote = current;
         current = Next();
         buffer.clear();
@@ -213,17 +212,22 @@ class LexerImpl : public Lexer
                 {
                     throw exception::LexerError("unexpect character after '\\x' line:") << line << " column:" << column;
                 }
-                buffer.push_back(static_cast<char>(strtoul(hex, 0, 16)));
+                buffer.push_back(static_cast<char>(std::strtoul(hex, 0, 16)));
                 return;
             }
             else if (isdigit(current))
             {
-                char oct[4] = {0};
+                char dec[4] = {0};
                 for (int i = 0; i < 3 && isdigit(current); ++i, current = Next())
                 {
-                    oct[i] = current;
+                    dec[i] = current;
                 }
-                buffer.push_back(static_cast<char>(strtoul(oct, 0, 8)));
+                auto result = std::strtoul(dec, 0, 10);
+                if (result > 255)
+                {
+                    throw exception::LexerError("decimal escape too large near \\") << result << " line:" << line << " column:" << column;
+                }
+                buffer.push_back(static_cast<char>(result));
                 return;
             }
             else
