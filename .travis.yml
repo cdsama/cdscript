@@ -14,16 +14,12 @@ before_install:
   - sudo apt-get install gcc-8 g++-8
   - export CC=gcc-8
   - export CXX=g++-8
-  - git clone https://github.com/cdsama/vcpkg.git
-  - cd vcpkg
-  - ./bootstrap-vcpkg.sh
-  - export VCPKG_ROOT="$(pwd -P)"
-  - cd ..
+  - bash ./build_scripts/build_vcpkg.sh
+  - export VCPKG_ROOT="$(pwd -P)/vcpkg"
+  - export PATH="${PATH}:${VCPKG_ROOT}"
 
 install:
-  - cd vcpkg
-  - ./vcpkg install catch2
-  - cd ..
+  - vcpkg install catch2
 
 script:
   - mkdir build
@@ -32,3 +28,6 @@ script:
   - cmake --build ./
   - cd ..
 
+cache:
+  directories:
+  - vcpkg
