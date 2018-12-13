@@ -62,6 +62,7 @@ class LexerImpl : public Lexer
             case '\f':
             case '\t':
             case '\v':
+            case '\0':
             {
                 current = Next();
                 break;
@@ -95,7 +96,7 @@ class LexerImpl : public Lexer
         }
         char next;
         code.read(&next, sizeof(next));
-        std::cout<<"NextChar "<<next<<std::endl;
+        std::cout << "NextChar\t" << next << "\t" << (int)next << std::endl;
         column++;
         return next;
     }
