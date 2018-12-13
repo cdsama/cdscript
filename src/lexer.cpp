@@ -95,6 +95,7 @@ class LexerImpl : public Lexer
         }
         char next;
         code.read(&next, sizeof(next));
+        std::cout<<"NextChar "<<next<<std::endl;
         column++;
         return next;
     }

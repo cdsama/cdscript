@@ -3,12 +3,14 @@
 #include "lexer.hpp"
 #include <sstream>
 #include <limits>
+#include <iostream>
 
 using namespace cdscript;
 
 TEST_CASE("Lexer-String", "[core][lexer][string]")
 {
     std::istringstream code(R"___("hello"""'hello''')___");
+    std::cout<<code.str()<<std::endl;
     auto lexer = Lexer::GetLexer(code);
     auto token = lexer->GetToken();
     CHECK(token.type == Token::String);
