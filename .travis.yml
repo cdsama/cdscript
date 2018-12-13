@@ -17,6 +17,7 @@ before_install:
   - cd vcpkg
   - ./bootstrap-vcpkg.sh
   - export VCPKG_ROOT="$(pwd -P)"
+  - cd ..
 
 install:
   - cd vcpkg
@@ -26,5 +27,7 @@ install:
 script:
   - mkdir build
   - cd build
+  - cmake ..
   - cmake --build ./
+  - cd ..
 
