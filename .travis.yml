@@ -9,10 +9,9 @@ addons:
     packages:
     - g++-8
     - cmake
+    - lcov
 
 before_install:
-  - sudo apt-get install gcc-8 g++-8
-  - export CC=gcc-8
   - export CXX=g++-8
   - bash ./build_scripts/build_vcpkg.sh
   - export VCPKG_ROOT="$(pwd -P)/vcpkg"
@@ -26,8 +25,17 @@ script:
   - cd build
   - cmake ..
   - cmake --build ./
+  - ./test
   - cd ..
 
 cache:
   directories:
   - vcpkg
+
+after_success:
+  - cd build
+  - lcov --directory . --capture --output-file coverage.info # capture coverage info
+  - lcov --remove coverage.info '/usr/*' --output-file coverage.info # filter out system
+  - lcov --list coverage.info #debug info
+  - bash <(curl -s https://codecov.io/bash) || echo "Codecov did not collect coverage reports"
+  - cd ..
