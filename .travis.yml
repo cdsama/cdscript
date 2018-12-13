@@ -1,0 +1,25 @@
+dist: xenial
+language: cpp
+compiler:
+  - gcc
+addons:
+  apt:
+    sources:
+    - ubuntu-toolchain-r-test
+    packages:
+    - g++-8
+    - cmake
+
+before_install:
+  - git clone https://github.com/cdsama/vcpkg.git
+  - cd vcpkg
+  - ./bootstrap-vcpkg.sh
+  - export VCPKG_ROOT="$(pwd -P)"
+  - ./vcpkg install catch2
+  - cd ..
+
+script:
+  - mkdir build
+  - cd build
+  - cmake --build ./
+
