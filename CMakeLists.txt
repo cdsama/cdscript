@@ -6,17 +6,26 @@ if(DEFINED ENV{VCPKG_ROOT} AND NOT DEFINED CMAKE_TOOLCHAIN_FILE)
 endif()
 message(STATUS "CMAKE_EXPORT_COMPILE_COMMANDS: ${CMAKE_EXPORT_COMPILE_COMMANDS}")
 
+project(cdscript CXX)
+
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENTIONS OFF)
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 set(CMAKE_INTERPROCEDURAL_OPTIMIZATION TRUE)
 
-project(cdscript CXX)
+if(CMAKE_CXX_COMPILER_ID STREQUAL MSVC)
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /W4 /permissive- /WX")
+elseif(CMAKE_CXX_COMPILER_ID MATCHES Clang)
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Weverything -Werror")
+elseif(CMAKE_CXX_COMPILER_ID STREQUAL GNU)
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -pedantic -Werror")
+endif()
 
 find_package(Catch2 CONFIG REQUIRED)
 
 add_library(cdscript STATIC src/lexer.cpp)
-add_executable(test src_test/test.cpp)
+aux_source_directory(src_test TEST_SOURCE_LIST)
+add_executable(test ${TEST_SOURCE_LIST})
 target_link_libraries(test PRIVATE Catch2::Catch2 PRIVATE cdscript)
 target_include_directories(test PRIVATE src)
