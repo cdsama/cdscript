@@ -12,6 +12,7 @@ addons:
 
 before_install:
   - sudo apt-get install gcc-8 g++-8
+  - export CXX=g++-8
   - git clone https://github.com/cdsama/vcpkg.git
   - cd vcpkg
   - ./bootstrap-vcpkg.sh
