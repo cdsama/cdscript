@@ -5,6 +5,7 @@
 
 #pragma once
 #include "token.hpp"
+#include <memory>
 #include <sstream>
 
 namespace cdscript
