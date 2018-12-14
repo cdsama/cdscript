@@ -90,13 +90,12 @@ class LexerImpl : public Lexer
 
     char Next()
     {
+        char next;
+        code.read(&next, sizeof(next));
         if (code.eof())
         {
             return EOF;
         }
-        char next;
-        code.read(&next, sizeof(next));
-        std::cout << "NextChar\t" << next << "\t" << (int)next << std::endl;
         column++;
         return next;
     }
