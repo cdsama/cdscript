@@ -14,10 +14,11 @@ struct Token
     enum Type
     {
         First = 256,
-        Integer,   // <integer>
-        Number,    // <number>
-        String,    // <string>
-        EndOfFile, // <EOF>
+        Integer,
+        Number,
+        String,
+        Identifier,
+        EndOfFile,
     };
     token_t type = 0;
     size_t line = 0;

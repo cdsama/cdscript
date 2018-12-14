@@ -9,14 +9,16 @@
 
 namespace cdscript
 {
-bool isdigit(char ch)
-{
-    return std::isdigit(static_cast<unsigned char>(ch));
-}
-bool isxdigit(char ch)
-{
-    return std::isxdigit(static_cast<unsigned char>(ch));
-}
+static const std::string disallowed = R"#($()\`@)#";
+inline bool isdigit(char ch) { return std::isdigit(static_cast<unsigned char>(ch)); }
+inline bool isxdigit(char ch) { return std::isxdigit(static_cast<unsigned char>(ch)); }
+inline bool isalpha(char ch) { return std::isalpha(static_cast<unsigned char>(ch)); }
+inline bool isalnum(char ch) { return std::isalnum(static_cast<unsigned char>(ch)); }
+inline bool ispunct(char ch) { return std::ispunct(static_cast<unsigned char>(ch)); }
+inline bool isidhead(char ch) { return isalpha(ch) || ch == '_'; }
+inline bool isidbody(char ch) { return isalnum(ch) || ch == '_'; }
+inline bool isallowedpunct(char ch) { return ispunct(ch) && disallowed.find(ch) == std::string::npos; };
+inline bool isdelimiter(char ch) { return isalnum(ch) || isallowedpunct(ch); }
 class LexerImpl : public Lexer
 {
   private:
@@ -57,8 +59,6 @@ class LexerImpl : public Lexer
             switch (current)
             {
             case ' ':
-            case '\a':
-            case '\b':
             case '\f':
             case '\t':
             case '\v':
@@ -78,10 +78,8 @@ class LexerImpl : public Lexer
             {
                 return SingleLineStringToken();
             }
-
             default:
-                current = Next();
-                break;
+                return IdentifierToken();
             }
         }
 
@@ -124,9 +122,10 @@ class LexerImpl : public Lexer
         token.column = column;
         return token;
     }
-    inline Token StringToken(token_t type, const std::string &str)
+
+    inline Token StringToken(const std::string &str)
     {
-        auto token = NormalToken(type);
+        auto token = NormalToken(Token::String);
         token.value = str;
         return token;
     }
@@ -153,7 +152,7 @@ class LexerImpl : public Lexer
         }
 
         current = Next();
-        return StringToken(Token::String, buffer);
+        return StringToken(buffer);
     }
 
     void ConvertEscapeCharacter()
@@ -243,6 +242,92 @@ class LexerImpl : public Lexer
         }
 
         current = Next();
+    }
+
+    Token IdentifierToken()
+    {
+        if (!isidhead(current))
+        {
+            throw exception::LexerError("unexpect character :") << current << " line:" << line << " column:" << column;
+        }
+        buffer.clear();
+        buffer.push_back(current);
+        current = Next();
+
+        while (isidbody(current))
+        {
+            buffer.push_back(current);
+            current = Next();
+        }
+
+        if (current == '"' && buffer == "R")
+        {
+            return RawStringToken();
+        }
+
+        Token token = NormalToken(Token::Identifier);
+        token.value = buffer;
+        return token;
+    }
+
+    Token RawStringToken()
+    {
+        buffer.clear();
+        const int max_delimiter_length = 16;
+        std::string delimiter = "";
+        delimiter.reserve(max_delimiter_length);
+        current = Next();
+        while (isdelimiter(current) && (delimiter.length() < max_delimiter_length))
+        {
+            delimiter.push_back(current);
+            current = Next();
+        }
+        if (isdelimiter(current))
+        {
+            throw exception::LexerError("raw string delimiter longer than ") << max_delimiter_length << " characters : line:" << line << " column:" << column;
+        }
+        if (current != '(')
+        {
+            throw exception::LexerError("invalid character in raw string delimiter :") << current << " line:" << line << " column:" << column;
+        }
+        delimiter.push_back('"');
+        current = Next();
+        bool finished = false;
+        while (!finished)
+        {
+            if (current == EOF)
+            {
+                throw exception::LexerError("incomplete string at line:") << line << " column:" << column;
+            }
+            while (current != ')' && current != EOF)
+            {
+                buffer.push_back(current);
+                current = Next();
+            }
+            current = Next();
+            std::string matchdelimiter = "";
+            for (const char dchar : delimiter)
+            {
+                if (current != dchar)
+                {
+                    break;
+                }
+                matchdelimiter.push_back(dchar);
+                current = Next();
+            }
+            if (matchdelimiter.length() == delimiter.length())
+            {
+                finished = true;
+            }
+            else
+            {
+
+                buffer.push_back(')');
+                buffer.append(matchdelimiter);
+            }
+        }
+
+        return StringToken(buffer);
     }
 };
 
