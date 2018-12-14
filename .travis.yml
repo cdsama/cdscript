@@ -13,7 +13,7 @@ addons:
 
 before_install:
   - export CXX=g++-8
-  - exoprt GCOV=gcov-8
+  - export GCOV=gcov-8
   - bash ./build_scripts/build_vcpkg.sh
   - export VCPKG_ROOT="$(pwd -P)/vcpkg"
   - export PATH="${PATH}:${VCPKG_ROOT}"
