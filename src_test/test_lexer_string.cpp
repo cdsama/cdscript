@@ -30,11 +30,11 @@ TEST_CASE("Lexer-String", "[core][lexer][string]")
 TEST_CASE("Lexer-String-EscapeCharacter", "[core][lexer][string]")
 {
     {
-        std::istringstream code(R"#("\f\n\r\t\v\\\"\'")#");
+        std::istringstream code(R"#("\a\b\f\n\r\t\v\\\"\'")#");
         auto lexer = Lexer::GetLexer(code);
         auto token = lexer->GetToken();
         CHECK(token.type == Token::String);
-        CHECK(std::any_cast<std::string>(token.value) == "\f\n\r\t\v\\\"\'");
+        CHECK(std::any_cast<std::string>(token.value) == "\a\b\f\n\r\t\v\\\"\'");
         token = lexer->GetToken();
         CHECK(token.type == Token::EndOfFile);
     }
