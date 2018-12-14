@@ -9,7 +9,6 @@ addons:
     packages:
     - g++-8
     - cmake
-    - lcov
 
 before_install:
   - export CXX=g++-8

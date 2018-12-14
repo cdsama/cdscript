@@ -17,7 +17,7 @@ inline bool isalnum(char ch) { return std::isalnum(static_cast<unsigned char>(ch
 inline bool ispunct(char ch) { return std::ispunct(static_cast<unsigned char>(ch)); }
 inline bool isidhead(char ch) { return isalpha(ch) || ch == '_'; }
 inline bool isidbody(char ch) { return isalnum(ch) || ch == '_'; }
-inline bool isallowedpunct(char ch) { return ispunct(ch) && disallowed.find(ch) == std::string::npos; };
+inline bool isallowedpunct(char ch) { return ispunct(ch) && disallowed.find(ch) == std::string::npos; }
 inline bool isdelimiter(char ch) { return isalnum(ch) || isallowedpunct(ch); }
 class LexerImpl : public Lexer
 {
