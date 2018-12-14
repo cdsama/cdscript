@@ -34,5 +34,5 @@ cache:
 
 after_success:
   - cd build
-  - bash <(curl -s https://raw.githubusercontent.com/codecov/codecov-bash/master/codecov) -x $GCOV -a "-s `pwd`"
+  - bash <(curl -s https://raw.githubusercontent.com/codecov/codecov-bash/master/codecov) -x $GCOV -a "-s `pwd`" >/dev/null 2>&1 && echo "Codecov success" || echo "Codecov did not collect coverage reports"
   - cd ..
