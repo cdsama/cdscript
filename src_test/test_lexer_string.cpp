@@ -135,6 +135,6 @@ TEST_CASE("Lexer-String-Raw", "[core][lexer][string]")
     {
         std::istringstream code(R"#(R"()@")#");
         auto lexer = Lexer::GetLexer(code);
-        CHECK_THROWS_WITH(lexer->GetToken(), R"#(incomplete string at line:1 column:6)#");
+        CHECK_THROWS_WITH(lexer->GetToken(), R"#(incomplete raw string at <eof>)#");
     }
 }

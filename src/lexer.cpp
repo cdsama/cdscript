@@ -297,7 +297,7 @@ class LexerImpl : public Lexer
         {
             if (current == EOF)
             {
-                throw exception::LexerError("incomplete string at line:") << line << " column:" << column;
+                throw exception::LexerError("incomplete raw string at <eof>");
             }
             while (current != ')' && current != EOF)
             {

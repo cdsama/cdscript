@@ -25,7 +25,7 @@ script:
   - cd build
   - cmake ..
   - cmake --build ./
-  - ./test
+  - ./unittest
   - cd ..
 
 cache:

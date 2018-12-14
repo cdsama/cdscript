@@ -59,7 +59,7 @@ TEST_CASE("Lexer-NewLine", "[core][lexer][newline]")
         CHECK(token.line == 4);
         CHECK(token.column == 0);
     }
-    
+
     {
         std::istringstream code("\r\r \r");
         auto lexer = Lexer::GetLexer(code);
