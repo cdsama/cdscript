@@ -102,17 +102,18 @@ class LexerImpl : public Lexer
 
     void NewLine()
     {
+        ++line;
         int next = Next();
-        if ((next == '\r' || next == '\n') && next != current)
+        if (((next == '\r' || next == '\n') && next != current) || (next == EOF))
         {
+            column = 0;
             current = Next();
         }
         else
         {
+            column = 1;
             current = next;
         }
-        ++line;
-        column = 0;
     }
 
     inline Token NormalToken(token_t type)
