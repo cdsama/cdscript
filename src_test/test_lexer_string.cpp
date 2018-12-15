@@ -116,6 +116,13 @@ TEST_CASE("Lexer-String-Raw", "[core][lexer][string]")
         CHECK(std::any_cast<std::string>(token.value) == R"#(\n)#");
     }
     {
+        std::istringstream code(R"#(R"___(@)__)_______)___")#");
+        auto lexer = Lexer::GetLexer(code);
+        auto token = lexer->GetToken();
+        CHECK(token.type == Token::String);
+        CHECK(std::any_cast<std::string>(token.value) == R"#(@)__)_______)#");
+    }
+    {
         std::istringstream code(R"#(R"________________(\n)________________")#");
         auto lexer = Lexer::GetLexer(code);
         auto token = lexer->GetToken();
