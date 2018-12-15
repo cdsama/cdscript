@@ -78,6 +78,25 @@ class LexerImpl : public Lexer
             {
                 return SingleLineStringToken();
             }
+            case '/':
+            {
+                char next = Next();
+                if (next == '/')
+                {
+                    current = Next();
+                    return SingleLineCommentToken();
+                }
+                else if (next == '*')
+                {
+                    current = Next();
+                    return MultiLineCommentToken();
+                }
+                else
+                {
+                    current = next;
+                    return NormalToken('/');
+                }
+            }
             default:
                 return IdentifierToken();
             }
@@ -98,12 +117,16 @@ class LexerImpl : public Lexer
         return next;
     }
 
-    void NewLine()
+    void NewLine(bool pushbuffer = false)
     {
         ++line;
         int next = Next();
         if (((next == '\r' || next == '\n') && next != current) || (next == EOF))
         {
+            if (pushbuffer && next != EOF)
+            {
+                buffer.push_back(next);
+            }
             column = 0;
             current = Next();
         }
@@ -328,6 +351,64 @@ class LexerImpl : public Lexer
         }
 
         return StringToken(buffer);
+    }
+
+    Token CommentToken(const std::string &str)
+    {
+        Token token = NormalToken(Token::Comment);
+        token.value = str;
+        return token;
+    }
+
+    Token SingleLineCommentToken()
+    {
+        buffer.clear();
+        while (current != '\r' && current != '\n' && current != EOF)
+        {
+            buffer.push_back(current);
+            current = Next();
+        }
+        return CommentToken(buffer);
+    }
+
+    Token MultiLineCommentToken()
+    {
+        buffer.clear();
+        bool finished = false;
+        while (current != EOF)
+        {
+            if (current == '\r' || current == '\n')
+            {
+                buffer.push_back(current);
+                NewLine(true);
+            }
+            else if (current == '*')
+            {
+                char next = Next();
+                if (next == '/')
+                {
+                    finished = true;
+                    current = Next();
+                    break;
+                }
+                else
+                {
+                    buffer.push_back(current);
+                    current = next;
+                }
+            }
+            else
+            {
+                buffer.push_back(current);
+                current = Next();
+            }
+        }
+
+        if (!finished)
+        {
+            throw exception::LexerError("comment unclosed at <eof>");
+        }
+        return CommentToken(buffer);
     }
 };
 

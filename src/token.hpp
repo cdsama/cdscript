@@ -18,6 +18,7 @@ struct Token
         Number,
         String,
         Identifier,
+        Comment,
         EndOfFile,
     };
     token_t type = 0;
