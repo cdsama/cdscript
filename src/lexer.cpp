@@ -97,6 +97,19 @@ class LexerImpl : public Lexer
                     return NormalToken('/');
                 }
             }
+            case '0':
+            case '1':
+            case '2':
+            case '3':
+            case '4':
+            case '5':
+            case '6':
+            case '7':
+            case '8':
+            case '9':
+            {
+                return NumberToken(1LL);
+            }
             default:
                 return IdentifierToken();
             }
@@ -168,12 +181,12 @@ class LexerImpl : public Lexer
         {
             if (current == EOF)
             {
-                throw exception::LexerError("incomplete string at <eof>");
+                throw ParseError("incomplete string at <eof>");
             }
 
             if (current == '\r' || current == '\n')
             {
-                throw exception::LexerError("incomplete string at line:") << line << " column:" << column;
+                throw ParseError("incomplete string at line:") << line << " column:" << column;
             }
 
             ConvertEscapeCharacter();
@@ -239,7 +252,7 @@ class LexerImpl : public Lexer
                 }
                 if (i == 0)
                 {
-                    throw exception::LexerError("unexpect character after '\\x' line:") << line << " column:" << column;
+                    throw ParseError("unexpect character after '\\x' line:") << line << " column:" << column;
                 }
                 buffer.push_back(static_cast<char>(std::strtoul(hex, 0, 16)));
                 return;
@@ -254,14 +267,14 @@ class LexerImpl : public Lexer
                 auto result = std::strtoul(dec, 0, 10);
                 if (result > 255)
                 {
-                    throw exception::LexerError("decimal escape too large near \\") << result << " line:" << line << " column:" << column;
+                    throw ParseError("decimal escape too large near \\") << result << " line:" << line << " column:" << column;
                 }
                 buffer.push_back(static_cast<char>(result));
                 return;
             }
             else
             {
-                throw exception::LexerError("unexpect character after '\\' line:") << line << " column:" << column;
+                throw ParseError("unexpect character after '\\' line:") << line << " column:" << column;
             }
         }
         else
@@ -276,7 +289,7 @@ class LexerImpl : public Lexer
     {
         if (!isidhead(current))
         {
-            throw exception::LexerError("unexpect character :") << current << " line:" << line << " column:" << column;
+            throw ParseError("unexpect character :") << current << " line:" << line << " column:" << column;
         }
         buffer.clear();
         buffer.push_back(current);
@@ -312,11 +325,11 @@ class LexerImpl : public Lexer
         }
         if (isdelimiter(current))
         {
-            throw exception::LexerError("raw string delimiter longer than ") << max_delimiter_length << " characters : line:" << line << " column:" << column;
+            throw ParseError("raw string delimiter longer than ") << max_delimiter_length << " characters : line:" << line << " column:" << column;
         }
         if (current != '(')
         {
-            throw exception::LexerError("invalid character in raw string delimiter :") << current << " line:" << line << " column:" << column;
+            throw ParseError("invalid character in raw string delimiter :") << current << " line:" << line << " column:" << column;
         }
         delimiter.push_back('"');
         current = Next();
@@ -325,7 +338,7 @@ class LexerImpl : public Lexer
         {
             if (current == EOF)
             {
-                throw exception::LexerError("incomplete raw string at <eof>");
+                throw ParseError("incomplete raw string at <eof>");
             }
             while (current != ')' && current != EOF)
             {
@@ -411,9 +424,20 @@ class LexerImpl : public Lexer
 
         if (!finished)
         {
-            throw exception::LexerError("comment unclosed at <eof>");
+            throw ParseError("comment unclosed at <eof>");
         }
         return CommentToken(buffer);
+    }
+
+    template <typename T>
+    Token NumberToken(T t)
+    {
+        Token token = NormalToken(Token::Number);
+        Token::NumberValue value;
+        value.number = t;
+        value.type = Token::NumberType<T>::value;
+        token.value = value;
+        return token;
     }
 };
 

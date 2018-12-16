@@ -1,4 +1,4 @@
-#include <catch2/catch.hpp>
+#include "catch2_ext.hpp"
 #include "lexer.hpp"
 using namespace cdscript;
 TEST_CASE("Lexer-Identifier", "[core][lexer][newline]")
@@ -8,11 +8,11 @@ TEST_CASE("Lexer-Identifier", "[core][lexer][newline]")
         auto lexer = Lexer::GetLexer(code);
         auto token = lexer->GetToken();
         CHECK(token.type == Token::Identifier);
-        CHECK(std::any_cast<std::string>(token.value) == "abc");
+        CHECK(token.str() == "abc");
     }
     {
         std::istringstream code("\a\b");
         auto lexer = Lexer::GetLexer(code);
-        CHECK_THROWS_WITH(lexer->GetToken(), "unexpect character :\a line:1 column:1");
+        CHECK_THROWS_MATCHES(lexer->GetToken(), Lexer::ParseError, WhatEquals("unexpect character :\a line:1 column:1"));
     }
 }

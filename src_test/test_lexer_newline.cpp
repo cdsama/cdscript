@@ -1,4 +1,4 @@
-#include <catch2/catch.hpp>
+#include "catch2_ext.hpp"
 #include "lexer.hpp"
 using namespace cdscript;
 TEST_CASE("Lexer-NewLine", "[core][lexer][newline]")
