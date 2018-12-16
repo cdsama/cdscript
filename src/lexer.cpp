@@ -117,13 +117,18 @@ class LexerImpl : public Lexer
         return next;
     }
 
-    void NewLine(bool pushbuffer = false)
+    enum class ShouldPush
+    {
+        ForCRLF,
+        Nothing,
+    };
+    void NewLine(ShouldPush type = ShouldPush::Nothing)
     {
         ++line;
         int next = Next();
         if (((next == '\r' || next == '\n') && next != current) || (next == EOF))
         {
-            if (pushbuffer && next != EOF)
+            if (type == ShouldPush::ForCRLF && next != EOF)
             {
                 buffer.push_back(next);
             }
@@ -353,7 +358,7 @@ class LexerImpl : public Lexer
         return StringToken(buffer);
     }
 
-    Token CommentToken(const std::string &str)
+    inline Token CommentToken(const std::string &str)
     {
         Token token = NormalToken(Token::Comment);
         token.value = str;
@@ -380,7 +385,7 @@ class LexerImpl : public Lexer
             if (current == '\r' || current == '\n')
             {
                 buffer.push_back(current);
-                NewLine(true);
+                NewLine(ShouldPush::ForCRLF);
             }
             else if (current == '*')
             {
