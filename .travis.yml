@@ -11,6 +11,7 @@ addons:
     - cmake
 
 before_install:
+  - export CC=gcc-8
   - export CXX=g++-8
   - export GCOV=gcov-8
   - bash ./build_scripts/build_vcpkg.sh

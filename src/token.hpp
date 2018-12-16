@@ -11,6 +11,31 @@
 #include "cdscript.hpp"
 namespace cdscript
 {
+template <typename T>
+struct SupportedNumberType
+{
+    static constexpr bool value = false;
+};
+
+#define SupportNumberType(__TYPE_NAME__)                    \
+    template <>                                             \
+    struct SupportedNumberType<__TYPE_NAME__>               \
+    {                                                       \
+        static constexpr bool value = true;                 \
+        static constexpr const char *name = #__TYPE_NAME__; \
+    }
+
+SupportNumberType(int8_t);
+SupportNumberType(int16_t);
+SupportNumberType(int32_t);
+SupportNumberType(int64_t);
+SupportNumberType(uint8_t);
+SupportNumberType(uint16_t);
+SupportNumberType(uint32_t);
+SupportNumberType(uint64_t);
+SupportNumberType(float);
+SupportNumberType(double);
+
 using token_t = int32_t;
 struct Token
 {
@@ -23,31 +48,6 @@ struct Token
         Comment,
         EndOfFile,
     };
-
-    template <typename T>
-    struct SupportedNumberType
-    {
-        static constexpr bool value = false;
-    };
-
-#define SupportNumberType(__typename__)                    \
-    template <>                                            \
-    struct SupportedNumberType<__typename__>               \
-    {                                                      \
-        static constexpr bool value = true;                \
-        static constexpr const char *name = #__typename__; \
-    };
-
-    SupportNumberType(int8_t);
-    SupportNumberType(int16_t);
-    SupportNumberType(int32_t);
-    SupportNumberType(int64_t);
-    SupportNumberType(uint8_t);
-    SupportNumberType(uint16_t);
-    SupportNumberType(uint32_t);
-    SupportNumberType(uint64_t);
-    SupportNumberType(float);
-    SupportNumberType(double);
 
     template <typename T, typename Enable = void>
     struct NumberType
@@ -87,7 +87,7 @@ struct Token
             {
                 return std::any_cast<T>(number);
             }
-            catch (std::bad_any_cast e)
+            catch (std::bad_any_cast &)
             {
                 throw NumberTypeError(SupportedNumberType<T>::name, NumberTypeMap[real]);
             }

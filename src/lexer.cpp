@@ -108,7 +108,7 @@ class LexerImpl : public Lexer
             case '8':
             case '9':
             {
-                return NumberToken(1LL);
+                return NumberToken((int64_t)1);
             }
             default:
                 return IdentifierToken();
