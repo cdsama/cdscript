@@ -4,9 +4,9 @@
 // https://opensource.org/licenses/MIT
 
 #define CATCH_CONFIG_MAIN
-#include <catch2/catch.hpp>
+#include "catch2_ext.hpp"
 
-TEST_CASE("std", "[core]")
+TEST_CASE("std", "[test]")
 {
     try
     {
@@ -18,4 +18,9 @@ TEST_CASE("std", "[core]")
     }
 
     CHECK(true);
+}
+
+TEST_CASE("catch2-ext", "[test]")
+{
+    CHECK(WhatEquals("what").describe() == "what");
 }
