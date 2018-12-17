@@ -116,7 +116,7 @@ struct Token
         int32_t type;
         std::any number;
         template <typename T>
-        T value()
+        T as()
         {
             return NumberType<T>::get(number, type);
         }

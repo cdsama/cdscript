@@ -92,7 +92,7 @@ TEST_CASE("Lexer-String-Exception", "[core][lexer][string]")
     {
         std::istringstream code(R"#("\xxx")#");
         auto lexer = Lexer::GetLexer(code);
-        CHECK_THROWS_MATCHES(lexer->GetToken(), Lexer::ParseError, WhatEquals(R"#(unexpect character after '\x' line:1 column:4)#"));
+        CHECK_THROWS_MATCHES(lexer->GetToken(), Lexer::ParseError, WhatEquals(R"#(unexpected character after '\x' line:1 column:4)#"));
     }
     {
         std::istringstream code(R"#("\256")#");
@@ -102,7 +102,7 @@ TEST_CASE("Lexer-String-Exception", "[core][lexer][string]")
     {
         std::istringstream code(R"#("\p")#");
         auto lexer = Lexer::GetLexer(code);
-        CHECK_THROWS_MATCHES(lexer->GetToken(), Lexer::ParseError, WhatEquals(R"#(unexpect character after '\' line:1 column:3)#"));
+        CHECK_THROWS_MATCHES(lexer->GetToken(), Lexer::ParseError, WhatEquals(R"#(unexpected character after '\' line:1 column:3)#"));
     }
 }
 

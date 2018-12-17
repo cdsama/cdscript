@@ -16,7 +16,7 @@ var add2 = func(a: int): int
     return a + 2;
 }
 
-for (var a : list)
+for (a in list)
 {
     
 }

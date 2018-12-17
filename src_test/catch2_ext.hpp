@@ -15,6 +15,6 @@ class WhatEquals : public Catch::MatcherBase<std::exception>
 
     virtual std::string describe() const
     {
-        return what;
+        return "\n!=\n" + what;
     }
 };

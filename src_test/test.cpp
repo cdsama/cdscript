@@ -6,21 +6,22 @@
 #define CATCH_CONFIG_MAIN
 #include "catch2_ext.hpp"
 
+#include <cerrno>
+
 TEST_CASE("std", "[test]")
 {
-    try
+    auto x = std::strtoull("0000100000001111111111111111111111111111111111111111111111111111111111111111", 0, 2);
+    std::cout << x << std::endl;
+    if (errno == ERANGE)
     {
-        INFO("num " << 9223372036854775807 << std::stoll("9223372036854775808") << 9223372036854775808e20 << std::numeric_limits<int64_t>::max());
+        std::cout << "out of range" << std::endl;
+        errno = 0;
     }
-    catch (const std::out_of_range &e)
-    {
-        std::cout << e.what() << '\n';
-    }
-
+    std::cout << (int32_t)((uint8_t)INT16_MAX) << std::endl;
     CHECK(true);
 }
 
 TEST_CASE("catch2-ext", "[test]")
 {
-    CHECK(WhatEquals("what").describe() == "what");
+    CHECK(WhatEquals("what").describe() == "\n!=\nwhat");
 }

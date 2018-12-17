@@ -10,6 +10,8 @@
 namespace cdscript
 {
 static const std::string disallowed = R"#($()\`@)#";
+inline bool isbdigit(char ch) { return ch == '0' || ch == '1'; }
+inline bool isodigit(char ch) { return ch >= '0' && ch <= '8'; }
 inline bool isdigit(char ch) { return std::isdigit(static_cast<unsigned char>(ch)); }
 inline bool isxdigit(char ch) { return std::isxdigit(static_cast<unsigned char>(ch)); }
 inline bool isalpha(char ch) { return std::isalpha(static_cast<unsigned char>(ch)); }
@@ -19,6 +21,12 @@ inline bool isidhead(char ch) { return isalpha(ch) || ch == '_'; }
 inline bool isidbody(char ch) { return isalnum(ch) || ch == '_'; }
 inline bool isallowedpunct(char ch) { return ispunct(ch) && disallowed.find(ch) == std::string::npos; }
 inline bool isdelimiter(char ch) { return isalnum(ch) || isallowedpunct(ch); }
+inline bool isexponent(char ch) { return ch == 'E' || ch == 'e'; }
+inline bool isxexponent(char ch) { return ch == 'P' || ch == 'p'; }
+inline bool isunsigned(char ch) { return ch == 'U' || ch == 'u'; }
+inline bool issigned(char ch) { return ch == 'I' || ch == 'i'; }
+inline bool isfloat(char ch) { return ch == 'F' || ch == 'f'; }
+
 class LexerImpl : public Lexer
 {
   private:
@@ -37,13 +45,18 @@ class LexerImpl : public Lexer
     {
     }
 
-    inline Token EndOfFileToken()
+    inline Token NormalToken(token_t type)
     {
         Token token;
+        token.type = type;
         token.line = line;
         token.column = column;
-        token.type = Token::EndOfFile;
         return token;
+    }
+
+    inline Token EndOfFileToken()
+    {
+        return NormalToken(Token::EndOfFile);
     }
 
     virtual Token GetToken() override
@@ -108,7 +121,7 @@ class LexerImpl : public Lexer
             case '8':
             case '9':
             {
-                return NumberToken((int64_t)1);
+                return NumberToken();
             }
             default:
                 return IdentifierToken();
@@ -138,7 +151,7 @@ class LexerImpl : public Lexer
     void NewLine(ShouldPush type = ShouldPush::Nothing)
     {
         ++line;
-        int next = Next();
+        char next = Next();
         if (((next == '\r' || next == '\n') && next != current) || (next == EOF))
         {
             if (type == ShouldPush::ForCRLF && next != EOF)
@@ -153,15 +166,6 @@ class LexerImpl : public Lexer
             column = 1;
             current = next;
         }
-    }
-
-    inline Token NormalToken(token_t type)
-    {
-        Token token;
-        token.type = type;
-        token.line = line;
-        token.column = column;
-        return token;
     }
 
     inline Token StringToken(const std::string &str)
@@ -245,14 +249,14 @@ class LexerImpl : public Lexer
             {
                 current = Next();
                 char hex[3] = {0};
-                int i = 0;
+                int32_t i = 0;
                 for (; i < 2 && isxdigit(current); ++i, current = Next())
                 {
                     hex[i] = current;
                 }
                 if (i == 0)
                 {
-                    throw ParseError("unexpect character after '\\x' line:") << line << " column:" << column;
+                    throw ParseError("unexpected character after '\\x' line:") << line << " column:" << column;
                 }
                 buffer.push_back(static_cast<char>(std::strtoul(hex, 0, 16)));
                 return;
@@ -260,7 +264,7 @@ class LexerImpl : public Lexer
             else if (isdigit(current))
             {
                 char dec[4] = {0};
-                for (int i = 0; i < 3 && isdigit(current); ++i, current = Next())
+                for (int32_t i = 0; i < 3 && isdigit(current); ++i, current = Next())
                 {
                     dec[i] = current;
                 }
@@ -274,7 +278,7 @@ class LexerImpl : public Lexer
             }
             else
             {
-                throw ParseError("unexpect character after '\\' line:") << line << " column:" << column;
+                throw ParseError("unexpected character after '\\' line:") << line << " column:" << column;
             }
         }
         else
@@ -289,7 +293,7 @@ class LexerImpl : public Lexer
     {
         if (!isidhead(current))
         {
-            throw ParseError("unexpect character :") << current << " line:" << line << " column:" << column;
+            throw ParseError("unexpected character :") << current << " line:" << line << " column:" << column;
         }
         buffer.clear();
         buffer.push_back(current);
@@ -314,7 +318,7 @@ class LexerImpl : public Lexer
     Token RawStringToken()
     {
         buffer.clear();
-        const int max_delimiter_length = 16;
+        const int32_t max_delimiter_length = 16;
         std::string delimiter = "";
         delimiter.reserve(max_delimiter_length);
         current = Next();
@@ -427,6 +431,201 @@ class LexerImpl : public Lexer
             throw ParseError("comment unclosed at <eof>");
         }
         return CommentToken(buffer);
+    }
+
+    Token NumberToken()
+    {
+        buffer.clear();
+        bool is_hex = false;
+        bool has_integer_part = false;
+        if (current == '0')
+        {
+            int next = Next();
+            if (next == 'b' || next == 'B')
+            {
+                current = Next();
+                return BinNumberToken();
+            }
+            else if (next == 'x' || next == 'X')
+            {
+                buffer.push_back(current);
+                buffer.push_back(next);
+                current = Next();
+                is_hex = true;
+            }
+            else
+            {
+                buffer.push_back(current);
+                current = next;
+                has_integer_part = true;
+            }
+        }
+
+        return HexNumberToken(is_hex, has_integer_part);
+    }
+
+    Token BinNumberToken()
+    {
+        bool should_push = false;
+        bool is_signed = true;
+        bool has_digit = false;
+        int32_t bit = 32;
+        while (isxdigit(current))
+        {
+            if (isbdigit(current))
+            {
+                has_digit = true;
+                should_push = (should_push || current == '1'); // trim 0
+                if (should_push)
+                {
+                    buffer.push_back(current);
+                }
+                current = Next();
+            }
+            else
+            {
+                throw ParseError("unexpected digit '") << current << "' in binary number literal at line:" << line << " column:" << column;
+            }
+        }
+
+        if (!has_digit)
+        {
+            throw ParseError("expect digit after binary number literal prefix at line:") << line << " column:" << column;
+        }
+        else if (buffer.empty())
+        {
+            buffer.push_back('0');
+        }
+
+        bool should_parse_bit = false;
+        if (isunsigned(current))
+        {
+            is_signed = false;
+            should_parse_bit = true;
+        }
+        else if (issigned(current))
+        {
+            should_parse_bit = true;
+        }
+        else if (isidhead(current))
+        {
+            throw ParseError("unexpected character '") << current << "' after binary number literal at line:" << line << " column:" << column;
+        }
+        else if (current == '.')
+        {
+            throw ParseError("unexpected '.' in binary number literal at line:") << line << " column:" << column;
+        }
+        current = Next();
+        if (should_parse_bit)
+        {
+            bit = ParseBit();
+            if (buffer.length() > bit)
+            {
+                throw ParseError("binary number literal is out of range at line:") << line << " column:" << column;
+            }
+        }
+        else
+        {
+            auto length = buffer.length();
+            if (length <= 32)
+            {
+                bit = 32;
+            }
+            else if (length <= 64)
+            {
+                bit = 64;
+            }
+            else
+            {
+                throw ParseError("binary number literal is out of range at line:") << line << " column:" << column;
+            }
+        }
+
+        if (is_signed)
+        {
+            int64_t number = std::strtoll(buffer.c_str(), nullptr, 2);
+            switch (bit)
+            {
+            case 8:
+                return NumberToken(static_cast<int8_t>(number));
+            case 16:
+                return NumberToken(static_cast<int16_t>(number));
+            case 32:
+                return NumberToken(static_cast<int32_t>(number));
+            default:
+                return NumberToken(static_cast<int64_t>(number));
+            }
+        }
+        else
+        {
+            uint64_t number = std::strtoll(buffer.c_str(), nullptr, 2);
+            switch (bit)
+            {
+            case 8:
+                return NumberToken(static_cast<uint8_t>(number));
+            case 16:
+                return NumberToken(static_cast<uint16_t>(number));
+            case 32:
+                return NumberToken(static_cast<uint32_t>(number));
+            default:
+                return NumberToken(static_cast<uint64_t>(number));
+            }
+        }
+    }
+
+    int32_t ParseBit()
+    {
+        char next = Next();
+        bool nextnext = true;
+        int32_t bit = 32;
+
+        if (current == '8')
+        {
+            bit = 8;
+            nextnext = false;
+        }
+        else if (current == '1' && next == '6')
+        {
+            bit = 16;
+        }
+        else if (current == '3' && next == '2')
+        {
+            bit = 32;
+        }
+        else if (current == '6' && next == '4')
+        {
+            bit = 64;
+        }
+        else
+        {
+            throw ParseError("unexpected postfix bit after binary number literal at line:") << line << " column:" << column;
+        }
+        if (nextnext)
+        {
+            next = Next();
+        }
+        if (isidbody(next))
+        {
+            throw ParseError("unexpected postfix character '") << next << "' after binary number literal at line:" << line << " column:" << column;
+        }
+        else
+        {
+            current = next;
+        }
+        return bit;
+    }
+
+    Token HexNumberToken(bool is_hex, bool has_integer_part)
+    {
+        buffer.clear();
+
+        return NumberToken<int32_t>(1);
+    }
+    Token HexNumberFractionalToken(bool is_hex, bool has_integer_part, bool has_point)
+    {
+        buffer.clear();
+
+        return NumberToken<int32_t>(1);
     }
 
     template <typename T>
