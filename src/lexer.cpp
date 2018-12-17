@@ -460,8 +460,9 @@ class LexerImpl : public Lexer
                 has_integer_part = true;
             }
         }
-
-        return HexNumberToken(is_hex, has_integer_part);
+        (void)is_hex;
+        (void)has_integer_part;
+        return NumberToken<int32_t>(1);
     }
 
     Token BinNumberToken()
@@ -469,7 +470,7 @@ class LexerImpl : public Lexer
         bool should_push = false;
         bool is_signed = true;
         bool has_digit = false;
-        int32_t bit = 32;
+        size_t bit = 32;
         while (isxdigit(current))
         {
             if (isbdigit(current))
@@ -573,11 +574,11 @@ class LexerImpl : public Lexer
         }
     }
 
-    int32_t ParseBit()
+    size_t ParseBit()
     {
         char next = Next();
         bool nextnext = true;
-        int32_t bit = 32;
+        size_t bit = 32;
 
         if (current == '8')
         {
@@ -613,19 +614,6 @@ class LexerImpl : public Lexer
             current = next;
         }
         return bit;
-    }
-
-    Token HexNumberToken(bool is_hex, bool has_integer_part)
-    {
-        buffer.clear();
-
-        return NumberToken<int32_t>(1);
-    }
-    Token HexNumberFractionalToken(bool is_hex, bool has_integer_part, bool has_point)
-    {
-        buffer.clear();
-
-        return NumberToken<int32_t>(1);
     }
 
     template <typename T>
