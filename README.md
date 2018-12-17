@@ -8,8 +8,8 @@
 <br>
 [![code size](https://img.shields.io/github/languages/code-size/cdsama/cdscript.svg)](https://github.com/cdsama/cdscript/archive/master.zip)
 [![C++: 17](https://img.shields.io/badge/C++-17-blue.svg)](https://en.cppreference.com/w/cpp/compiler_support#cpp17)
-[![cmake:3.12+](https://img.shields.io/badge/CMake-3.12+-blue.svg)](https://cmake.org/download/)
-[![cmake:3.12+](https://img.shields.io/badge/vcpkg-catch2-blue.svg)](https://cmake.org/download/)
+[![cmake:3.12+](https://img.shields.io/badge/CMake-3.12+-blue.svg)](https://cmake.org/download)
+[![vcpkg:catch2](https://img.shields.io/badge/vcpkg-catch2-blue.svg)](https://github.com/cdsama/vcpkg)
 
 
 A toy project
