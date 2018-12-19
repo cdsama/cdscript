@@ -445,7 +445,7 @@ class LexerImpl : public Lexer
         buffer.clear();
         if (current == '0')
         {
-            int next = Next();
+            char next = Next();
             if (next == 'b' || next == 'B')
             {
                 current = Next();
@@ -593,7 +593,6 @@ class LexerImpl : public Lexer
     Token OctNumberToken()
     {
         bool is_signed = true;
-        bool has_digit = false;
         size_t bit = 32;
         while (isxdigit(current))
         {

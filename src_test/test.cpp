@@ -17,7 +17,6 @@ TEST_CASE("std", "[test]")
         std::cout << "out of range" << std::endl;
         errno = 0;
     }
-    std::cout << (int32_t)((uint8_t)INT16_MAX) << std::endl;
     CHECK(true);
 }
 
