@@ -659,14 +659,9 @@ class LexerImpl : public Lexer
             {
                 RangeError = true;
             }
-            else if (should_parse_bit)
-            {
-                RangeError = (GetDataBit<uint64_t, uint32_t, UINT8_MAX, UINT16_MAX, UINT32_MAX>(number) > bit);
-            }
             else
             {
-                bit = GetDataBit<uint64_t, uint32_t, UINT8_MAX, UINT16_MAX, UINT32_MAX>(number);
-                bit = std::max(bit, BIT32);
+                RangeError = (GetDataBit<uint64_t, uint32_t, UINT8_MAX, UINT16_MAX, UINT32_MAX>(number) > bit);
             }
             if (!RangeError)
             {

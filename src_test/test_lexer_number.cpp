@@ -184,7 +184,7 @@ TEST_CASE("Lexer-Number-Bin-Exceptions", "[core][lexer][number]")
 TEST_CASE("Lexer-Number-Oct", "[core][lexer][number]")
 {
     {
-        std::istringstream code("000 001 0777 077777 077777777777 0777777777777777777777");
+        std::istringstream code("000 001 0777 077777 0777777777 077777777777 0777777777777777777777");
         auto lexer = Lexer::GetLexer(code);
         auto token = lexer->GetToken();
         CHECK(token.type == Token::Number);
@@ -198,6 +198,9 @@ TEST_CASE("Lexer-Number-Oct", "[core][lexer][number]")
         token = lexer->GetToken();
         CHECK(token.type == Token::Number);
         CHECK(token.number().as<int32_t>() == 32767);
+        token = lexer->GetToken();
+        CHECK(token.type == Token::Number);
+        CHECK(token.number().as<int32_t>() == 134217727);
         token = lexer->GetToken();
         CHECK(token.type == Token::Number);
         CHECK(token.number().as<int64_t>() == 8589934591);
@@ -267,6 +270,11 @@ TEST_CASE("Lexer-Number-Oct-Exceptions", "[core][lexer][number]")
         std::istringstream code("0777777777777777777777777777777777777777777");
         auto lexer = Lexer::GetLexer(code);
         CHECK_THROWS_MATCHES(lexer->GetToken(), Lexer::ParseError, WhatEquals("octal number literal is out of range at line:1 column:43"));
+    }
+    {
+        std::istringstream code("0777777777777777777777777777777777777777777u64");
+        auto lexer = Lexer::GetLexer(code);
+        CHECK_THROWS_MATCHES(lexer->GetToken(), Lexer::ParseError, WhatEquals("octal number literal is out of range at line:1 column:46"));
     }
 }
 
