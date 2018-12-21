@@ -10,13 +10,13 @@
 
 TEST_CASE("std", "[test]")
 {
-    auto x = std::strtoull("1777777777777777777777", nullptr, 8);
-    std::cout << x << std::endl;
-    if (errno == ERANGE)
-    {
-        std::cout << "out of range" << std::endl;
-        errno = 0;
-    }
+    // auto x = std::strtoull("1777777777777777777777", nullptr, 8);
+    // std::cout << x << std::endl;
+    // if (errno == ERANGE)
+    // {
+    //     std::cout << "out of range" << std::endl;
+    //     errno = 0;
+    // }
     CHECK(true);
 }
 
