@@ -83,7 +83,7 @@ TEST_CASE("Lexer-Number-Bin", "[core][lexer][number]")
         CHECK(token.number().as<int64_t>() == 8589934591);
         token = lexer->GetToken();
         CHECK(token.type == Token::Number);
-        CHECK(token.number().as<int64_t>() == INT64_MAX);
+        CHECK(token.number().as<int64_t>() == std::numeric_limits<int64_t>::max());
     }
 }
 
@@ -118,7 +118,7 @@ TEST_CASE("Lexer-Number-Bin-Postfix", "[core][lexer][number]")
         CHECK(token.number().as<uint64_t>() == 9);
         token = lexer->GetToken();
         CHECK(token.type == Token::Number);
-        CHECK(token.number().as<uint64_t>() == UINT64_MAX);
+        CHECK(token.number().as<uint64_t>() == std::numeric_limits<uint64_t>::max());
     }
 }
 
@@ -206,10 +206,10 @@ TEST_CASE("Lexer-Number-Oct", "[core][lexer][number]")
         CHECK(token.number().as<int64_t>() == 8589934591);
         token = lexer->GetToken();
         CHECK(token.type == Token::Number);
-        CHECK(token.number().as<int64_t>() == INT64_MAX);
+        CHECK(token.number().as<int64_t>() == std::numeric_limits<int64_t>::max());
         token = lexer->GetToken();
         CHECK(token.type == Token::Number);
-        CHECK(token.number().as<uint64_t>() == UINT64_MAX);
+        CHECK(token.number().as<uint64_t>() == std::numeric_limits<uint64_t>::max());
     }
 }
 TEST_CASE("Lexer-Number-Oct-Postfix", "[core][lexer][number]")
@@ -243,7 +243,7 @@ TEST_CASE("Lexer-Number-Oct-Postfix", "[core][lexer][number]")
         CHECK(token.number().as<uint64_t>() == 9);
         token = lexer->GetToken();
         CHECK(token.type == Token::Number);
-        CHECK(token.number().as<uint64_t>() == UINT64_MAX);
+        CHECK(token.number().as<uint64_t>() == std::numeric_limits<uint64_t>::max());
     }
 }
 
@@ -300,10 +300,10 @@ TEST_CASE("Lexer-Number-Dec", "[core][lexer][number]")
         CHECK(token.number().as<int32_t>() == 77777777);
         token = lexer->GetToken();
         CHECK(token.type == Token::Number);
-        CHECK(token.number().as<int32_t>() == INT32_MAX);
+        CHECK(token.number().as<int32_t>() == std::numeric_limits<int32_t>::max());
         token = lexer->GetToken();
         CHECK(token.type == Token::Number);
-        CHECK(token.number().as<int64_t>() == INT64_MAX);
+        CHECK(token.number().as<int64_t>() == std::numeric_limits<int64_t>::max());
     }
 }
 
@@ -329,13 +329,13 @@ TEST_CASE("Lexer-Number-Dec-Postfix", "[core][lexer][number]")
         CHECK(token.number().as<int32_t>() == 77777777);
         token = lexer->GetToken();
         CHECK(token.type == Token::Number);
-        CHECK(token.number().as<int32_t>() == INT32_MAX);
+        CHECK(token.number().as<int32_t>() == std::numeric_limits<int32_t>::max());
         token = lexer->GetToken();
         CHECK(token.type == Token::Number);
-        CHECK(token.number().as<uint32_t>() == UINT32_MAX);
+        CHECK(token.number().as<uint32_t>() == std::numeric_limits<uint32_t>::max());
         token = lexer->GetToken();
         CHECK(token.type == Token::Number);
-        CHECK(token.number().as<int64_t>() == INT64_MAX);
+        CHECK(token.number().as<int64_t>() == std::numeric_limits<int64_t>::max());
     }
 }
 
@@ -375,28 +375,28 @@ TEST_CASE("Lexer-Number-Hex-Postfix", "[core][lexer][number]")
         auto lexer = Lexer::GetLexer(code);
         auto token = lexer->GetToken();
         CHECK(token.type == Token::Number);
-        CHECK(token.number().as<uint8_t>() == UINT8_MAX);
+        CHECK(token.number().as<uint8_t>() == std::numeric_limits<uint8_t>::max());
         token = lexer->GetToken();
         CHECK(token.type == Token::Number);
-        CHECK(token.number().as<uint16_t>() == UINT16_MAX);
+        CHECK(token.number().as<uint16_t>() == std::numeric_limits<uint16_t>::max());
         token = lexer->GetToken();
         CHECK(token.type == Token::Number);
-        CHECK(token.number().as<uint32_t>() == UINT32_MAX);
+        CHECK(token.number().as<uint32_t>() == std::numeric_limits<uint32_t>::max());
         token = lexer->GetToken();
         CHECK(token.type == Token::Number);
-        CHECK(token.number().as<uint64_t>() == UINT64_MAX);
+        CHECK(token.number().as<uint64_t>() == std::numeric_limits<uint64_t>::max());
         token = lexer->GetToken();
         CHECK(token.type == Token::Number);
-        CHECK(token.number().as<int8_t>() == INT8_MAX);
+        CHECK(token.number().as<int8_t>() == std::numeric_limits<int8_t>::max());
         token = lexer->GetToken();
         CHECK(token.type == Token::Number);
-        CHECK(token.number().as<int16_t>() == INT16_MAX);
+        CHECK(token.number().as<int16_t>() == std::numeric_limits<int16_t>::max());
         token = lexer->GetToken();
         CHECK(token.type == Token::Number);
-        CHECK(token.number().as<int32_t>() == INT32_MAX);
+        CHECK(token.number().as<int32_t>() == std::numeric_limits<int32_t>::max());
         token = lexer->GetToken();
         CHECK(token.type == Token::Number);
-        CHECK(token.number().as<int64_t>() == INT64_MAX);
+        CHECK(token.number().as<int64_t>() == std::numeric_limits<int64_t>::max());
     }
 }
 
@@ -422,16 +422,16 @@ TEST_CASE("Lexer-Number-Float", "[core][lexer][number]")
         CHECK(token.number().as<double>() == 5.3);
         token = lexer->GetToken();
         CHECK(token.type == Token::Number);
-        CHECK(token.number().as<float>() == FLT_MAX);
+        CHECK(token.number().as<float>() == std::numeric_limits<float>::max());
         token = lexer->GetToken();
         CHECK(token.type == Token::Number);
-        CHECK(token.number().as<float>() == FLT_MIN);
+        CHECK(token.number().as<float>() == std::numeric_limits<float>::min());
         token = lexer->GetToken();
         CHECK(token.type == Token::Number);
-        CHECK(token.number().as<double>() == DBL_MAX);
+        CHECK(token.number().as<double>() == std::numeric_limits<double>::max());
         token = lexer->GetToken();
         CHECK(token.type == Token::Number);
-        CHECK(token.number().as<double>() == DBL_MIN);
+        CHECK(token.number().as<double>() == std::numeric_limits<double>::min());
         token = lexer->GetToken();
         CHECK(token.type == Token::Number);
         CHECK(token.number().as<double>() == 1.0 / 16.0);

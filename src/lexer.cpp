@@ -665,7 +665,7 @@ class LexerImpl : public Lexer
             }
             else
             {
-                RangeError = (GetDataBit<int64_t, int32_t, INT8_MAX, INT16_MAX, INT32_MAX>(number) > bit);
+                RangeError = (GetDataBit<int8_t, int16_t, int32_t, int64_t>(number) > bit);
             }
             if (!RangeError)
             {
@@ -681,7 +681,7 @@ class LexerImpl : public Lexer
             }
             else
             {
-                RangeError = (GetDataBit<uint64_t, uint32_t, UINT8_MAX, UINT16_MAX, UINT32_MAX>(number) > bit);
+                RangeError = (GetDataBit<uint8_t, uint16_t, uint32_t, uint64_t>(number) > bit);
             }
             if (!RangeError)
             {
@@ -827,7 +827,7 @@ class LexerImpl : public Lexer
             }
             else
             {
-                RangeError = (GetDataBit<int64_t, int32_t, INT8_MAX, INT16_MAX, INT32_MAX>(number) > bit);
+                RangeError = (GetDataBit<int8_t, int16_t, int32_t, int64_t>(number) > bit);
             }
             if (!RangeError)
             {
@@ -843,7 +843,7 @@ class LexerImpl : public Lexer
             }
             else
             {
-                RangeError = (GetDataBit<uint64_t, uint32_t, UINT8_MAX, UINT16_MAX, UINT32_MAX>(number) > bit);
+                RangeError = (GetDataBit<uint8_t, uint16_t, uint32_t, uint64_t>(number) > bit);
             }
             if (!RangeError)
             {
@@ -854,18 +854,18 @@ class LexerImpl : public Lexer
         throw ParseError("number literal is out of range at line:") << line << " column:" << column;
     }
 
-    template <typename Number64T, typename Number32T, Number32T Number8Max, Number32T Number16Max, Number32T Number32Max>
+    template <typename Number8T, typename Number16T, typename Number32T, typename Number64T>
     size_t GetDataBit(const Number64T &number)
     {
-        if (number <= static_cast<Number64T>(Number8Max))
+        if (number <= static_cast<Number64T>(std::numeric_limits<Number8T>::max()))
         {
             return BIT8;
         }
-        else if (number <= static_cast<Number64T>(Number16Max))
+        else if (number <= static_cast<Number64T>(std::numeric_limits<Number16T>::max()))
         {
             return BIT16;
         }
-        else if (number <= static_cast<Number64T>(Number32Max))
+        else if (number <= static_cast<Number64T>(std::numeric_limits<Number32T>::max()))
         {
             return BIT32;
         }
@@ -877,11 +877,11 @@ class LexerImpl : public Lexer
 
     Token AutoIntTypeNumber(const uint64_t &number)
     {
-        if (number <= static_cast<uint64_t>(INT32_MAX))
+        if (number <= static_cast<uint64_t>(std::numeric_limits<int32_t>::max()))
         {
             return NumberToken(static_cast<int32_t>(number));
         }
-        else if (number <= static_cast<uint64_t>(INT64_MAX))
+        else if (number <= static_cast<uint64_t>(std::numeric_limits<int64_t>::max()))
         {
             return NumberToken(static_cast<int64_t>(number));
         }
