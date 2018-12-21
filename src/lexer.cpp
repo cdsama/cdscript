@@ -12,6 +12,16 @@
 namespace cdscript
 {
 static const std::string disallowed = R"#($()\`@)#";
+static const size_t BIT8 = 8;
+static const size_t BIT16 = 16;
+static const size_t BIT32 = 32;
+static const size_t BIT64 = 64;
+enum class ERadix : int
+{
+    Dec = 10,
+    Hex = 16
+};
+
 inline bool isbdigit(char ch) { return ch == '0' || ch == '1'; }
 inline bool isodigit(char ch) { return ch >= '0' && ch <= '8'; }
 inline bool isdigit(char ch) { return std::isdigit(static_cast<unsigned char>(ch)); }
@@ -28,11 +38,8 @@ inline bool isxexponent(char ch) { return ch == 'P' || ch == 'p'; }
 inline bool isunsigned(char ch) { return ch == 'U' || ch == 'u'; }
 inline bool issigned(char ch) { return ch == 'I' || ch == 'i'; }
 inline bool isfloat(char ch) { return ch == 'F' || ch == 'f'; }
-
-static const size_t BIT8 = 8;
-static const size_t BIT16 = 16;
-static const size_t BIT32 = 32;
-static const size_t BIT64 = 64;
+inline bool isdigit(char ch, ERadix radix) { return (radix == ERadix::Dec) ? isdigit(ch) : isxdigit(ch); }
+inline bool isexponent(char ch, ERadix radix) { return (radix == ERadix::Dec) ? isexponent(ch) : isxexponent(ch); }
 
 class LexerImpl : public Lexer
 {
@@ -456,7 +463,7 @@ class LexerImpl : public Lexer
                 buffer.push_back(current);
                 buffer.push_back(next);
                 current = Next();
-                return HexNumberToken();
+                return DecHexNumberToken(ERadix::Hex);
             }
             else if (isdigit(next))
             {
@@ -464,8 +471,13 @@ class LexerImpl : public Lexer
                 current = next;
                 return OctNumberToken();
             }
+            else
+            {
+                buffer.push_back(current);
+                current = next;
+            }
         }
-        return DecNumberToken();
+        return DecHexNumberToken(ERadix::Dec);
     }
 
     Token BinNumberToken()
@@ -501,15 +513,15 @@ class LexerImpl : public Lexer
             buffer.push_back('0');
         }
 
-        bool should_parse_bit = false;
+        bool should_match_bit = false;
         if (isunsigned(current))
         {
             is_signed = false;
-            should_parse_bit = true;
+            should_match_bit = true;
         }
         else if (issigned(current))
         {
-            should_parse_bit = true;
+            should_match_bit = true;
         }
         else if (isidhead(current))
         {
@@ -520,7 +532,7 @@ class LexerImpl : public Lexer
             throw ParseError("unexpected '.' in binary number literal at line:") << line << " column:" << column;
         }
         current = Next();
-        if (should_parse_bit)
+        if (should_match_bit)
         {
             bit = ParseBit();
             if (buffer.length() > bit)
@@ -606,15 +618,15 @@ class LexerImpl : public Lexer
                 throw ParseError("unexpected digit '") << current << "' in octal number literal at line:" << line << " column:" << column;
             }
         }
-        bool should_parse_bit = false;
+        bool should_match_bit = false;
         if (isunsigned(current))
         {
             is_signed = false;
-            should_parse_bit = true;
+            should_match_bit = true;
         }
         else if (issigned(current))
         {
-            should_parse_bit = true;
+            should_match_bit = true;
         }
         else if (isidhead(current))
         {
@@ -625,27 +637,35 @@ class LexerImpl : public Lexer
             throw ParseError("unexpected '.' in octal number literal at line:") << line << " column:" << column;
         }
         current = Next();
-        if (should_parse_bit)
+        if (should_match_bit)
         {
             bit = ParseBit();
         }
         bool RangeError = false;
         errno = 0;
-        if (is_signed)
+
+        if (!should_match_bit)
+        {
+            uint64_t number = std::strtoull(buffer.c_str(), nullptr, 8);
+            if (errno == ERANGE)
+            {
+                RangeError = true;
+            }
+            else
+            {
+                return AutoIntTypeNumber(number);
+            }
+        }
+        else if (is_signed)
         {
             int64_t number = std::strtoll(buffer.c_str(), nullptr, 8);
             if (errno == ERANGE)
             {
                 RangeError = true;
             }
-            else if (should_parse_bit)
-            {
-                RangeError = (GetDataBit<int64_t, int32_t, INT8_MAX, INT16_MAX, INT32_MAX>(number) > bit);
-            }
             else
             {
-                bit = GetDataBit<int64_t, int32_t, INT8_MAX, INT16_MAX, INT32_MAX>(number);
-                bit = std::max(bit, BIT32);
+                RangeError = (GetDataBit<int64_t, int32_t, INT8_MAX, INT16_MAX, INT32_MAX>(number) > bit);
             }
             if (!RangeError)
             {
@@ -672,14 +692,166 @@ class LexerImpl : public Lexer
         throw ParseError("octal number literal is out of range at line:") << line << " column:" << column;
     }
 
-    Token DecNumberToken()
+    Token DecHexNumberToken(ERadix radix)
     {
-        return NumberToken<int32_t>(10);
-    }
+        bool has_point = false;
+        bool has_exponent = false;
+        bool is_float = false;
+        bool is_signed = true;
+        bool should_match_bit = false;
+        size_t bit = 32;
+        while (isdigit(current, radix) || current == '.')
+        {
+            if (current == '.')
+            {
+                if (has_point)
+                {
+                    throw ParseError("multiple '.' in number literal at line:") << line << " column:" << column;
+                }
+                else
+                {
+                    has_point = true;
+                    buffer.push_back(current);
+                    current = Next();
+                }
+            }
+            else
+            {
+                buffer.push_back(current);
+                current = Next();
+            }
+        }
 
-    Token HexNumberToken()
-    {
-        return NumberToken<int32_t>(16);
+        if (isexponent(current, radix))
+        {
+            buffer.push_back(current);
+            current = Next();
+            if (current == '-' || current == '+')
+            {
+                buffer.push_back(current);
+                current = Next();
+            }
+            while (isdigit(current, radix))
+            {
+                buffer.push_back(current);
+                current = Next();
+                has_exponent = true;
+            }
+            if (!has_exponent)
+            {
+                throw ParseError("expect exponent digit at line:") << line << " column:" << column;
+            }
+        }
+        if (isfloat(current))
+        {
+            if (has_point || has_exponent)
+            {
+                is_float = true;
+                current = Next();
+            }
+            else
+            {
+                throw ParseError("unexpected '") << current << "' after integer literal at line:" << line << " column:" << column;
+            }
+        }
+        else if (isunsigned(current))
+        {
+            if (has_point || has_exponent)
+            {
+                throw ParseError("unexpected '") << current << "' after float literal at line:" << line << " column:" << column;
+            }
+            is_signed = false;
+            should_match_bit = true;
+        }
+        else if (issigned(current))
+        {
+            if (has_point || has_exponent)
+            {
+                throw ParseError("unexpected '") << current << "' after float literal at line:" << line << " column:" << column;
+            }
+            should_match_bit = true;
+        }
+        else if (isidhead(current))
+        {
+            throw ParseError("unexpected '") << current << "' after number literal at line:" << line << " column:" << column;
+        }
+        current = Next();
+        if (should_match_bit)
+        {
+            bit = ParseBit();
+        }
+        bool RangeError = false;
+        errno = 0;
+        if (is_float)
+        {
+            float number = std::strtof(buffer.c_str(), nullptr);
+            if (errno == ERANGE)
+            {
+                RangeError = true;
+            }
+            else
+            {
+                return NumberToken<float>(number);
+            }
+        }
+        else if (has_point || has_exponent)
+        {
+            double number = std::strtod(buffer.c_str(), nullptr);
+            if (errno == ERANGE)
+            {
+                RangeError = true;
+            }
+            else
+            {
+                return NumberToken<double>(number);
+            }
+        }
+        else if (!should_match_bit)
+        {
+            uint64_t number = std::strtoull(buffer.c_str(), nullptr, static_cast<int>(radix));
+            if (errno == ERANGE)
+            {
+                RangeError = true;
+            }
+            else
+            {
+                return AutoIntTypeNumber(number);
+            }
+        }
+        else if (is_signed)
+        {
+            int64_t number = std::strtoll(buffer.c_str(), nullptr, static_cast<int>(radix));
+            if (errno == ERANGE)
+            {
+                RangeError = true;
+            }
+            else
+            {
+                RangeError = (GetDataBit<int64_t, int32_t, INT8_MAX, INT16_MAX, INT32_MAX>(number) > bit);
+            }
+            if (!RangeError)
+            {
+                return NumberTokenByBit<true>(number, bit);
+            }
+        }
+        else
+        {
+            uint64_t number = std::strtoull(buffer.c_str(), nullptr, static_cast<int>(radix));
+            if (errno == ERANGE)
+            {
+                RangeError = true;
+            }
+            else
+            {
+                RangeError = (GetDataBit<uint64_t, uint32_t, UINT8_MAX, UINT16_MAX, UINT32_MAX>(number) > bit);
+            }
+            if (!RangeError)
+            {
+                return NumberTokenByBit<false>(number, bit);
+            }
+        }
+        errno = 0;
+        throw ParseError("number literal is out of range at line:") << line << " column:" << column;
     }
 
     template <typename Number64T, typename Number32T, Number32T Number8Max, Number32T Number16Max, Number32T Number32Max>
@@ -700,6 +872,22 @@ class LexerImpl : public Lexer
         else
         {
             return BIT64;
+        }
+    }
+
+    Token AutoIntTypeNumber(const uint64_t &number)
+    {
+        if (number <= static_cast<uint64_t>(INT32_MAX))
+        {
+            return NumberToken(static_cast<int32_t>(number));
+        }
+        else if (number <= static_cast<uint64_t>(INT64_MAX))
+        {
+            return NumberToken(static_cast<int64_t>(number));
+        }
+        else
+        {
+            return NumberToken(number);
         }
     }
 

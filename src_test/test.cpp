@@ -10,7 +10,7 @@
 
 TEST_CASE("std", "[test]")
 {
-    auto x = std::strtoull("0000100000001111111111111111111111111111111111111111111111111111111111111111", 0, 2);
+    auto x = std::strtoull("1777777777777777777777", nullptr, 8);
     std::cout << x << std::endl;
     if (errno == ERANGE)
     {

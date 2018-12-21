@@ -184,7 +184,7 @@ TEST_CASE("Lexer-Number-Bin-Exceptions", "[core][lexer][number]")
 TEST_CASE("Lexer-Number-Oct", "[core][lexer][number]")
 {
     {
-        std::istringstream code("000 001 0777 077777 0777777777 077777777777 0777777777777777777777");
+        std::istringstream code("000 001 0777 077777 0777777777 077777777777 0777777777777777777777 01777777777777777777777");
         auto lexer = Lexer::GetLexer(code);
         auto token = lexer->GetToken();
         CHECK(token.type == Token::Number);
@@ -207,6 +207,9 @@ TEST_CASE("Lexer-Number-Oct", "[core][lexer][number]")
         token = lexer->GetToken();
         CHECK(token.type == Token::Number);
         CHECK(token.number().as<int64_t>() == INT64_MAX);
+        token = lexer->GetToken();
+        CHECK(token.type == Token::Number);
+        CHECK(token.number().as<uint64_t>() == UINT64_MAX);
     }
 }
 TEST_CASE("Lexer-Number-Oct-Postfix", "[core][lexer][number]")
@@ -278,13 +281,232 @@ TEST_CASE("Lexer-Number-Oct-Exceptions", "[core][lexer][number]")
     }
 }
 
-TEST_CASE("Lexer-Number-Int", "[core][lexer][number]")
+TEST_CASE("Lexer-Number-Dec", "[core][lexer][number]")
 {
     {
-        std::istringstream code("10");
+        std::istringstream code("0 1 55555 77777777 2147483647 9223372036854775807");
         auto lexer = Lexer::GetLexer(code);
         auto token = lexer->GetToken();
         CHECK(token.type == Token::Number);
-        CHECK(token.number().as<int32_t>() == 10);
+        CHECK(token.number().as<int32_t>() == 0);
+        token = lexer->GetToken();
+        CHECK(token.type == Token::Number);
+        CHECK(token.number().as<int32_t>() == 1);
+        token = lexer->GetToken();
+        CHECK(token.type == Token::Number);
+        CHECK(token.number().as<int32_t>() == 55555);
+        token = lexer->GetToken();
+        CHECK(token.type == Token::Number);
+        CHECK(token.number().as<int32_t>() == 77777777);
+        token = lexer->GetToken();
+        CHECK(token.type == Token::Number);
+        CHECK(token.number().as<int32_t>() == INT32_MAX);
+        token = lexer->GetToken();
+        CHECK(token.type == Token::Number);
+        CHECK(token.number().as<int64_t>() == INT64_MAX);
+    }
+}
+
+TEST_CASE("Lexer-Number-Dec-Postfix", "[core][lexer][number]")
+{
+    {
+        std::istringstream code("0i8 1u8 22222i16 44444u16 77777777i32 2147483647i32 4294967295u32 9223372036854775807i64");
+        auto lexer = Lexer::GetLexer(code);
+        auto token = lexer->GetToken();
+        CHECK(token.type == Token::Number);
+        CHECK(token.number().as<int8_t>() == 0);
+        token = lexer->GetToken();
+        CHECK(token.type == Token::Number);
+        CHECK(token.number().as<uint8_t>() == 1);
+        token = lexer->GetToken();
+        CHECK(token.type == Token::Number);
+        CHECK(token.number().as<int16_t>() == 22222);
+        token = lexer->GetToken();
+        CHECK(token.type == Token::Number);
+        CHECK(token.number().as<uint16_t>() == 44444);
+        token = lexer->GetToken();
+        CHECK(token.type == Token::Number);
+        CHECK(token.number().as<int32_t>() == 77777777);
+        token = lexer->GetToken();
+        CHECK(token.type == Token::Number);
+        CHECK(token.number().as<int32_t>() == INT32_MAX);
+        token = lexer->GetToken();
+        CHECK(token.type == Token::Number);
+        CHECK(token.number().as<uint32_t>() == UINT32_MAX);
+        token = lexer->GetToken();
+        CHECK(token.type == Token::Number);
+        CHECK(token.number().as<int64_t>() == INT64_MAX);
+    }
+}
+
+TEST_CASE("Lexer-Number-Hex", "[core][lexer][number]")
+{
+    {
+        std::istringstream code("0x0 0x1 0xff 0xffff 0xefffffff 0x7fffffffffffffff 0xffffffffffffffff");
+        auto lexer = Lexer::GetLexer(code);
+        auto token = lexer->GetToken();
+        CHECK(token.type == Token::Number);
+        CHECK(token.number().as<int32_t>() == 0);
+        token = lexer->GetToken();
+        CHECK(token.type == Token::Number);
+        CHECK(token.number().as<int32_t>() == 1);
+        token = lexer->GetToken();
+        CHECK(token.type == Token::Number);
+        CHECK(token.number().as<int32_t>() == 0xff);
+        token = lexer->GetToken();
+        CHECK(token.type == Token::Number);
+        CHECK(token.number().as<int32_t>() == 0xffff);
+        token = lexer->GetToken();
+        CHECK(token.type == Token::Number);
+        CHECK(token.number().as<int64_t>() == 0xefffffff);
+        token = lexer->GetToken();
+        CHECK(token.type == Token::Number);
+        CHECK(token.number().as<int64_t>() == 0x7fffffffffffffff);
+        token = lexer->GetToken();
+        CHECK(token.type == Token::Number);
+        CHECK(token.number().as<uint64_t>() == 0xffffffffffffffff);
+    }
+}
+
+TEST_CASE("Lexer-Number-Hex-Postfix", "[core][lexer][number]")
+{
+    {
+        std::istringstream code("0xffu8 0xffffu16 0xffffffffu32 0xffffffffffffffffu64 0x7fi8 0x7fffi16 0x7fffffffi32 0x7fffffffffffffffi64");
+        auto lexer = Lexer::GetLexer(code);
+        auto token = lexer->GetToken();
+        CHECK(token.type == Token::Number);
+        CHECK(token.number().as<uint8_t>() == UINT8_MAX);
+        token = lexer->GetToken();
+        CHECK(token.type == Token::Number);
+        CHECK(token.number().as<uint16_t>() == UINT16_MAX);
+        token = lexer->GetToken();
+        CHECK(token.type == Token::Number);
+        CHECK(token.number().as<uint32_t>() == UINT32_MAX);
+        token = lexer->GetToken();
+        CHECK(token.type == Token::Number);
+        CHECK(token.number().as<uint64_t>() == UINT64_MAX);
+        token = lexer->GetToken();
+        CHECK(token.type == Token::Number);
+        CHECK(token.number().as<int8_t>() == INT8_MAX);
+        token = lexer->GetToken();
+        CHECK(token.type == Token::Number);
+        CHECK(token.number().as<int16_t>() == INT16_MAX);
+        token = lexer->GetToken();
+        CHECK(token.type == Token::Number);
+        CHECK(token.number().as<int32_t>() == INT32_MAX);
+        token = lexer->GetToken();
+        CHECK(token.type == Token::Number);
+        CHECK(token.number().as<int64_t>() == INT64_MAX);
+    }
+}
+
+TEST_CASE("Lexer-Number-Float", "[core][lexer][number]")
+{
+    {
+        std::istringstream code("0.1 1. 1.f 1.0 5.3 3.402823466e+38F 1.175494351e-38F 1.7976931348623158e+308 2.2250738585072014e-308 0x0.1 0x0.1p2");
+        auto lexer = Lexer::GetLexer(code);
+        auto token = lexer->GetToken();
+        CHECK(token.type == Token::Number);
+        CHECK(token.number().as<double>() == 0.1);
+        token = lexer->GetToken();
+        CHECK(token.type == Token::Number);
+        CHECK(token.number().as<double>() == 1.);
+        token = lexer->GetToken();
+        CHECK(token.type == Token::Number);
+        CHECK(token.number().as<float>() == 1.f);
+        token = lexer->GetToken();
+        CHECK(token.type == Token::Number);
+        CHECK(token.number().as<double>() == 1.0);
+        token = lexer->GetToken();
+        CHECK(token.type == Token::Number);
+        CHECK(token.number().as<double>() == 5.3);
+        token = lexer->GetToken();
+        CHECK(token.type == Token::Number);
+        CHECK(token.number().as<float>() == FLT_MAX);
+        token = lexer->GetToken();
+        CHECK(token.type == Token::Number);
+        CHECK(token.number().as<float>() == FLT_MIN);
+        token = lexer->GetToken();
+        CHECK(token.type == Token::Number);
+        CHECK(token.number().as<double>() == DBL_MAX);
+        token = lexer->GetToken();
+        CHECK(token.type == Token::Number);
+        CHECK(token.number().as<double>() == DBL_MIN);
+        token = lexer->GetToken();
+        CHECK(token.type == Token::Number);
+        CHECK(token.number().as<double>() == 1.0 / 16.0);
+        token = lexer->GetToken();
+        CHECK(token.type == Token::Number);
+        CHECK(token.number().as<double>() == 1.0 / 16.0 * 2.0 * 2.0);
+    }
+}
+
+TEST_CASE("Lexer-Number-Dec-Hex-Exceptions", "[core][lexer][number]")
+{
+    {
+        std::istringstream code("0..9");
+        auto lexer = Lexer::GetLexer(code);
+        CHECK_THROWS_MATCHES(lexer->GetToken(), Lexer::ParseError, WhatEquals("multiple '.' in number literal at line:1 column:3"));
+    }
+    {
+        std::istringstream code("0x0..9");
+        auto lexer = Lexer::GetLexer(code);
+        CHECK_THROWS_MATCHES(lexer->GetToken(), Lexer::ParseError, WhatEquals("multiple '.' in number literal at line:1 column:5"));
+    }
+    {
+        std::istringstream code("0.1ex");
+        auto lexer = Lexer::GetLexer(code);
+        CHECK_THROWS_MATCHES(lexer->GetToken(), Lexer::ParseError, WhatEquals("expect exponent digit at line:1 column:5"));
+    }
+    {
+        std::istringstream code("0x0.1px");
+        auto lexer = Lexer::GetLexer(code);
+        CHECK_THROWS_MATCHES(lexer->GetToken(), Lexer::ParseError, WhatEquals("expect exponent digit at line:1 column:7"));
+    }
+    {
+        std::istringstream code("0x0.1p2fx");
+        auto lexer = Lexer::GetLexer(code);
+        CHECK_THROWS_MATCHES(lexer->GetToken(), Lexer::ParseError, WhatEquals("unexpected 'x' after number literal at line:1 column:9"));
+    }
+    {
+        std::istringstream code("1f");
+        auto lexer = Lexer::GetLexer(code);
+        CHECK_THROWS_MATCHES(lexer->GetToken(), Lexer::ParseError, WhatEquals("unexpected 'f' after integer literal at line:1 column:2"));
+    }
+    {
+        std::istringstream code("1.0i32");
+        auto lexer = Lexer::GetLexer(code);
+        CHECK_THROWS_MATCHES(lexer->GetToken(), Lexer::ParseError, WhatEquals("unexpected 'i' after float literal at line:1 column:4"));
+    }
+    {
+        std::istringstream code("0x1.0u32");
+        auto lexer = Lexer::GetLexer(code);
+        CHECK_THROWS_MATCHES(lexer->GetToken(), Lexer::ParseError, WhatEquals("unexpected 'u' after float literal at line:1 column:6"));
+    }
+
+    {
+        std::istringstream code("1.0x");
+        auto lexer = Lexer::GetLexer(code);
+        CHECK_THROWS_MATCHES(lexer->GetToken(), Lexer::ParseError, WhatEquals("unexpected 'x' after number literal at line:1 column:4"));
+    }
+    {
+        std::istringstream code("0x1.0x");
+        auto lexer = Lexer::GetLexer(code);
+        CHECK_THROWS_MATCHES(lexer->GetToken(), Lexer::ParseError, WhatEquals("unexpected 'x' after number literal at line:1 column:6"));
+    }
+    {
+        std::istringstream code("0xffi8");
+        auto lexer = Lexer::GetLexer(code);
+        CHECK_THROWS_MATCHES(lexer->GetToken(), Lexer::ParseError, WhatEquals("number literal is out of range at line:1 column:6"));
+    }
+    {
+        std::istringstream code("0xffffffffffffffffffffffff");
+        auto lexer = Lexer::GetLexer(code);
+        CHECK_THROWS_MATCHES(lexer->GetToken(), Lexer::ParseError, WhatEquals("number literal is out of range at line:1 column:26"));
+    }
+    {
+        std::istringstream code("3.812823466e+38F");
+        auto lexer = Lexer::GetLexer(code);
+        CHECK_THROWS_MATCHES(lexer->GetToken(), Lexer::ParseError, WhatEquals("number literal is out of range at line:1 column:16"));
     }
 }
