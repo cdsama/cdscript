@@ -13,7 +13,7 @@ class WhatEquals : public Catch::MatcherBase<std::exception>
         return i.what() == what;
     }
 
-    virtual std::string describe() const
+    virtual std::string describe() const override
     {
         return "\n!=\n" + what;
     }
