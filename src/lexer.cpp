@@ -82,7 +82,6 @@ class LexerImpl : public Lexer
 
         while (current != EOF)
         {
-
             switch (current)
             {
             case ' ':
@@ -107,7 +106,7 @@ class LexerImpl : public Lexer
             }
             case '/':
             {
-                char next = Next();
+                auto next = Next();
                 if (next == '/')
                 {
                     current = Next();
@@ -117,6 +116,11 @@ class LexerImpl : public Lexer
                 {
                     current = Next();
                     return MultiLineCommentToken();
+                }
+                else if (next == '=')
+                {
+                    current = Next();
+                    return NormalToken(Token::DivideEqual);
                 }
                 else
                 {
@@ -136,6 +140,86 @@ class LexerImpl : public Lexer
             case '9':
             {
                 return NumberToken();
+            }
+            case '<':
+            {
+                return XOrXXOrXEqualToken('<', Token::LeftShift, Token::LessEqual);
+            }
+            case '>':
+            {
+                return XOrXXOrXEqualToken('>', Token::RightShift, Token::GreatEqual);
+            }
+            case '+':
+            {
+                return XOrXXOrXEqualToken('+', Token::PlusPlus, Token::PlusEqual);
+            }
+            case '-':
+            {
+                return XOrXXOrXEqualToken('-', Token::MinusMinus, Token::MinusEqual);
+            }
+            case '*':
+            {
+                return XOrXEqualToken('*', Token::MultiplyEqual);
+            }
+            case '%':
+            {
+                return XOrXEqualToken('%', Token::ModuloEqual);
+            }
+            case '&':
+            {
+                return XOrXXOrXEqualToken('&', Token::And, Token::AndEqual);
+            }
+            case '|':
+            {
+                return XOrXXOrXEqualToken('|', Token::Or, Token::OrEqual);
+            }
+            case '^':
+            {
+                return XOrXEqualToken('^', Token::ExclusiveOrEqual);
+            }
+            case '!':
+            {
+                return XOrXEqualToken('!', Token::NotEqual);
+            }
+            case '?':
+            case ':':
+            case ';':
+            case ',':
+            case '@':
+            case '#':
+            case '(':
+            case ')':
+            case '[':
+            case ']':
+            case '{':
+            case '}':
+            {
+                auto token = current;
+                current = Next();
+                return NormalToken(token);
+            }
+            case '.':
+            {
+                auto next = Next();
+                if (next == '.')
+                {
+                    next = Next();
+                    if (next == '.')
+                    {
+                        current = Next();
+                        return NormalToken(Token::VarArg);
+                    }
+                    else
+                    {
+                        current = next;
+                        return NormalToken(Token::Concat);
+                    }
+                }
+                else
+                {
+                    current = next;
+                    return NormalToken('.');
+                }
             }
             default:
                 return IdentifierToken();
@@ -165,7 +249,7 @@ class LexerImpl : public Lexer
     void NewLine(ShouldPush type = ShouldPush::Nothing)
     {
         ++line;
-        char next = Next();
+        auto next = Next();
         if (((next == '\r' || next == '\n') && next != current) || (next == EOF))
         {
             if (type == ShouldPush::ForCRLF && next != EOF)
@@ -420,7 +504,7 @@ class LexerImpl : public Lexer
             }
             else if (current == '*')
             {
-                char next = Next();
+                auto next = Next();
                 if (next == '/')
                 {
                     finished = true;
@@ -452,7 +536,7 @@ class LexerImpl : public Lexer
         buffer.clear();
         if (current == '0')
         {
-            char next = Next();
+            auto next = Next();
             if (next == 'b' || next == 'B')
             {
                 current = Next();
@@ -893,7 +977,7 @@ class LexerImpl : public Lexer
 
     size_t ParseBit()
     {
-        char next = Next();
+        auto next = Next();
         bool nextnext = true;
         size_t bit = 32;
 
@@ -942,6 +1026,41 @@ class LexerImpl : public Lexer
         value.type = Token::NumberType<T>::value;
         token.value = value;
         return token;
+    }
+
+    Token XOrXXOrXEqualToken(token_t XType, token_t XXType, token_t XEqualType)
+    {
+        auto next = Next();
+        if (next == current)
+        {
+            current = Next();
+            return NormalToken(XXType);
+        }
+        else if (next == '=')
+        {
+            current = Next();
+            return NormalToken(XEqualType);
+        }
+        else
+        {
+            current = next;
+            return NormalToken(XType);
+        }
+    }
+
+    Token XOrXEqualToken(token_t XType, token_t XEqualType)
+    {
+        auto next = Next();
+        if (next == '=')
+        {
+            current = Next();
+            return NormalToken(XEqualType);
+        }
+        else
+        {
+            current = next;
+            return NormalToken(XType);
+        }
     }
 };
 
