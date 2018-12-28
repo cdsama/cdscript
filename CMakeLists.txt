@@ -27,7 +27,11 @@ endif()
 
 find_package(Catch2 CONFIG REQUIRED)
 
-add_library(cdscript STATIC src/lexer.cpp)
+add_library(cdscript STATIC 
+src/lexer.cpp
+src/syntax.cpp
+src/parser.cpp
+)
 aux_source_directory(src_test TEST_SOURCE_LIST)
 add_executable(unittest ${TEST_SOURCE_LIST})
 target_include_directories(unittest PRIVATE src)
