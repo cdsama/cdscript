@@ -859,9 +859,9 @@ class LexerImpl : public Lexer
         {
             throw ParseError("unexpected '") << current << "' after number literal at line:" << line << " column:" << column;
         }
-        current = Next();
         if (should_match_bit)
         {
+            current = Next();
             bit = ParseBit();
         }
         bool RangeError = false;

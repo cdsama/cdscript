@@ -142,7 +142,7 @@ struct Token
         }
     };
 
-    token_t type = 0;
+    token_t type = EndOfFile;
     size_t line = 0;
     size_t column = 0;
     std::any value;

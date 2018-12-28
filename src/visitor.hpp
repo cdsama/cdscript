@@ -13,7 +13,7 @@ class Visitor
 {
   public:
     virtual ~Visitor() {}
-    virtual void Visit(BinaryExpress *syntax, std::any &data) = 0;
+    virtual void Visit(BinaryExpression *syntax, std::any &data) = 0;
     virtual void Visit(LiteralValue *syntax, std::any &data) = 0;
 };
 
