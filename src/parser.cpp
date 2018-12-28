@@ -26,6 +26,10 @@ class ParserImpl : public Parser
     {
         return std::make_unique<BinaryExpress>();
     }
+
+    std::unique_ptr<Syntax> ParseExpress()
+    {
+    }
 };
 
 std::unique_ptr<Parser> Parser::GetParser(std::unique_ptr<Lexer> &lexer)

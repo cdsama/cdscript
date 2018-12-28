@@ -14,12 +14,16 @@ using namespace cdscript;
 class TestVisitor : public Visitor
 {
   public:
-    void Visit(BinaryExpress *syntax, std::any &data) override
-    {
-        (void)syntax;
-        auto types = std::any_cast<std::list<std::string> *>(data);
-        types->push_back("BinaryExpress");
+#define DEFAULT_VISIT_IMPL(__CLASS_NAME__)                          \
+    void Visit(__CLASS_NAME__ *syntax, std::any &data) override     \
+    {                                                               \
+        (void)syntax;                                               \
+        auto types = std::any_cast<std::list<std::string> *>(data); \
+        types->push_back(#__CLASS_NAME__);                          \
     }
+
+    DEFAULT_VISIT_IMPL(BinaryExpress)
+    DEFAULT_VISIT_IMPL(LiteralValue)
 };
 
 TEST_CASE("Parser ", "[core][parser]")

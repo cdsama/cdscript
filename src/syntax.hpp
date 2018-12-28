@@ -23,6 +23,14 @@ class Syntax
 class BinaryExpress : public Syntax
 {
   public:
+    Token op;
+    DECL_VISIT_FUNC();
+};
+
+class LiteralValue : public Syntax
+{
+  public:
+    Token value;
     DECL_VISIT_FUNC();
 };
 
