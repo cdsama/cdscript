@@ -207,6 +207,10 @@ class LexerImpl : public Lexer
             {
                 return XOrXEqualToken('!', Token::NotEqual);
             }
+            case '=':
+            {
+                return XOrXEqualToken('=', Token::Equal);
+            }
             case '?':
             case ':':
             case ';':
@@ -417,7 +421,7 @@ class LexerImpl : public Lexer
     {
         if (!isidhead(current))
         {
-            throw ParseError("unexpected character :") << current << " line:" << line << " column:" << column;
+            throw ParseError("unexpected character :'") << current << "' line:" << line << " column:" << column;
         }
         buffer.clear();
         buffer.push_back(current);

@@ -45,7 +45,28 @@ class ParserImpl : public Parser
             return 90;
         case '+':
         case '-':
-            return 80;
+            return 89;
+        case Token::LeftShift:
+        case Token::RightShift:
+            return 88;
+        case '<':
+        case '>':
+        case Token::LessEqual:
+        case Token::GreatEqual:
+            return 87;
+        case Token::Equal:
+        case Token::NotEqual:
+            return 86;
+        case '&':
+            return 85;
+        case '^':
+            return 84;
+        case '|':
+            return 83;
+        case Token::And:
+            return 82;
+        case Token::Or:
+            return 81;
         default:
             return 0;
         }
@@ -55,6 +76,9 @@ class ParserImpl : public Parser
     {
         switch (type)
         {
+        case Token::Null:
+        case Token::True:
+        case Token::False:
         case Token::Number:
         case Token::String:
             return true;
@@ -63,7 +87,7 @@ class ParserImpl : public Parser
         }
     }
 
-    syntax_t ParseExpression([[maybe_unused]] syntax_t left = syntax_t(), [[maybe_unused]] precedence_t left_precedence = 0, [[maybe_unused]] Token op = Token())
+    syntax_t ParseExpression(syntax_t left = syntax_t(), precedence_t left_precedence = 0, Token op = Token())
     {
         LookAhead();
         std::unique_ptr<Syntax> expression;
@@ -101,6 +125,9 @@ class ParserImpl : public Parser
     {
         switch (LookAhead().type)
         {
+        case Token::Null:
+        case Token::True:
+        case Token::False:
         case Token::Number:
         case Token::String:
             return std::make_unique<LiteralValue>(std::move(NextToken()));

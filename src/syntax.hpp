@@ -15,7 +15,7 @@ class Syntax
 {
   public:
     virtual ~Syntax() {}
-    virtual void Visit([[maybe_unused]] Visitor *visitor, [[maybe_unused]] std::any &data){};
+    virtual void Visit(Visitor *visitor, std::any &data) = 0;
 };
 
 using syntax_t = std::unique_ptr<Syntax>;

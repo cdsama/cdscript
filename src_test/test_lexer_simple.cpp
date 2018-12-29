@@ -5,7 +5,7 @@ using namespace cdscript;
 TEST_CASE("Lexer-SingleToken", "[core][lexer][simple]")
 {
 
-    std::istringstream code("+ - * / % & | ^ !");
+    std::istringstream code("+ - * / % & | ^ ! =");
     auto lexer = Lexer::GetLexer(code);
     CHECK(lexer->GetToken().type == '+');
     CHECK(lexer->GetToken().type == '-');
@@ -16,6 +16,7 @@ TEST_CASE("Lexer-SingleToken", "[core][lexer][simple]")
     CHECK(lexer->GetToken().type == '|');
     CHECK(lexer->GetToken().type == '^');
     CHECK(lexer->GetToken().type == '!');
+    CHECK(lexer->GetToken().type == '=');
 }
 
 TEST_CASE("Lexer-PureSingleToken", "[core][lexer][simple]")
@@ -49,7 +50,7 @@ TEST_CASE("Lexer-dot", "[core][lexer][simple]")
 
 TEST_CASE("Lexer-XEqualToken", "[core][lexer][simple]")
 {
-    std::istringstream code("+= -= *= /= %= &= |= ^= !=");
+    std::istringstream code("+= -= *= /= %= &= |= ^= != ==");
     auto lexer = Lexer::GetLexer(code);
     CHECK(lexer->GetToken().type == Token::PlusEqual);
     CHECK(lexer->GetToken().type == Token::MinusEqual);
@@ -60,6 +61,7 @@ TEST_CASE("Lexer-XEqualToken", "[core][lexer][simple]")
     CHECK(lexer->GetToken().type == Token::OrEqual);
     CHECK(lexer->GetToken().type == Token::ExclusiveOrEqual);
     CHECK(lexer->GetToken().type == Token::NotEqual);
+    CHECK(lexer->GetToken().type == Token::Equal);
 }
 TEST_CASE("Lexer-XXToken", "[core][lexer][simple]")
 {
