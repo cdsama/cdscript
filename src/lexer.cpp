@@ -3,11 +3,12 @@
 // This software is released under the MIT License.
 // https://opensource.org/licenses/MIT
 
-#include "lexer.hpp"
 #include <iostream>
 #include <cctype>
 #include <cerrno>
 #include <algorithm>
+#include <unordered_map>
+#include "lexer.hpp"
 
 namespace cdscript
 {
@@ -40,6 +41,31 @@ inline bool issigned(char ch) { return ch == 'I' || ch == 'i'; }
 inline bool isfloat(char ch) { return ch == 'F' || ch == 'f'; }
 inline bool isdigit(char ch, ERadix radix) { return (radix == ERadix::Dec) ? isdigit(ch) : isxdigit(ch); }
 inline bool isexponent(char ch, ERadix radix) { return (radix == ERadix::Dec) ? isexponent(ch) : isxexponent(ch); }
+
+static std::unordered_map<std::string, token_t> KeyWords = {
+    {"null", Token::Null},
+    {"true", Token::True},
+    {"false", Token::False},
+    {"if", Token::If},
+    {"else", Token::Else},
+    {"for", Token::For},
+    {"while", Token::While},
+    {"in", Token::In},
+    {"break", Token::Break},
+    {"continue", Token::Continue},
+    {"return", Token::Return},
+    {"fun", Token::Function},
+    {"try", Token::Try},
+    {"catch", Token::Catch},
+    {"throw", Token::Throw},
+    {"class", Token::Class},
+    {"interface", Token::Interface},
+    {"is", Token::Is},
+    {"object", Token::Object},
+    {"this", Token::This},
+    {"super", Token::Super},
+    {"any", Token::Any},
+};
 
 class LexerImpl : public Lexer
 {
@@ -406,6 +432,12 @@ class LexerImpl : public Lexer
         if (current == '"' && buffer == "R")
         {
             return RawStringToken();
+        }
+
+        auto itrKW = KeyWords.find(buffer);
+        if (itrKW != KeyWords.end())
+        {
+            return NormalToken(itrKW->second);
         }
 
         Token token = NormalToken(Token::Identifier);

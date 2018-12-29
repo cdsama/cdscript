@@ -1,5 +1,6 @@
 #include "catch2_ext.hpp"
 #include "lexer.hpp"
+#include <unordered_map>
 using namespace cdscript;
 TEST_CASE("Lexer-SingleToken", "[core][lexer][simple]")
 {
@@ -70,4 +71,39 @@ TEST_CASE("Lexer-XXToken", "[core][lexer][simple]")
     CHECK(lexer->GetToken().type == Token::MinusMinus);
     CHECK(lexer->GetToken().type == Token::And);
     CHECK(lexer->GetToken().type == Token::Or);
+}
+
+TEST_CASE("Lexer-KeyWords", "[core][lexer][simple]")
+{
+    std::unordered_map<std::string, token_t> KeyWords = {
+        {"null", Token::Null},
+        {"true", Token::True},
+        {"false", Token::False},
+        {"if", Token::If},
+        {"else", Token::Else},
+        {"for", Token::For},
+        {"while", Token::While},
+        {"in", Token::In},
+        {"break", Token::Break},
+        {"continue", Token::Continue},
+        {"return", Token::Return},
+        {"fun", Token::Function},
+        {"try", Token::Try},
+        {"catch", Token::Catch},
+        {"throw", Token::Throw},
+        {"class", Token::Class},
+        {"interface", Token::Interface},
+        {"is", Token::Is},
+        {"object", Token::Object},
+        {"this", Token::This},
+        {"super", Token::Super},
+        {"any", Token::Any},
+    };
+
+    for (auto &&i : KeyWords)
+    {
+        std::istringstream code(i.first);
+        auto lexer = Lexer::GetLexer(code);
+        CHECK(lexer->GetToken().type == i.second);
+    }
 }
