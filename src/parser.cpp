@@ -72,7 +72,7 @@ class ParserImpl : public Parser
         }
     }
 
-    bool IsDirectExpression(token_t type)
+    bool IsPrimaryExpression(token_t type)
     {
         switch (type)
         {
@@ -91,9 +91,9 @@ class ParserImpl : public Parser
     {
         LookAhead();
         std::unique_ptr<Syntax> expression;
-        if (IsDirectExpression(ahead1.type))
+        if (IsPrimaryExpression(ahead1.type))
         {
-            expression = ParseDirectExpression();
+            expression = ParsePrimaryExpression();
         }
         while (true)
         {
@@ -121,7 +121,7 @@ class ParserImpl : public Parser
         }
     }
 
-    syntax_t ParseDirectExpression()
+    syntax_t ParsePrimaryExpression()
     {
         switch (LookAhead().type)
         {
