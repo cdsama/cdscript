@@ -9,8 +9,11 @@
 #include <algorithm>
 #include <unordered_map>
 #include "lexer.hpp"
+#include "utils.hpp"
 
-namespace cdscript
+using cd::exception::Exception;
+
+namespace cd::script
 {
 static const std::string disallowed = R"#($()\`@)#";
 static const size_t BIT8 = 8;
@@ -313,12 +316,12 @@ class LexerImpl : public Lexer
         {
             if (current == EOF)
             {
-                throw ParseError("incomplete string at <eof>");
+                throw Exception("incomplete string at <eof>");
             }
 
             if (current == '\r' || current == '\n')
             {
-                throw ParseError("incomplete string at line:") << line << " column:" << column;
+                throw Exception("incomplete string at line:", line, " column:", column);
             }
 
             ConvertEscapeCharacter();
@@ -384,7 +387,7 @@ class LexerImpl : public Lexer
                 }
                 if (i == 0)
                 {
-                    throw ParseError("unexpected character after '\\x' line:") << line << " column:" << column;
+                    throw Exception("unexpected character after '\\x' line:",line," column:",column);
                 }
                 buffer.push_back(static_cast<char>(std::strtoul(hex, 0, 16)));
                 return;
@@ -399,14 +402,14 @@ class LexerImpl : public Lexer
                 auto result = std::strtoul(dec, 0, 10);
                 if (result > 255)
                 {
-                    throw ParseError("decimal escape too large near \\") << result << " line:" << line << " column:" << column;
+                    throw Exception("decimal escape too large near \\",result," line:",line," column:",column);
                 }
                 buffer.push_back(static_cast<char>(result));
                 return;
             }
             else
             {
-                throw ParseError("unexpected character after '\\' line:") << line << " column:" << column;
+                throw Exception("unexpected character after '\\' line:",line," column:",column);
             }
         }
         else
@@ -421,7 +424,7 @@ class LexerImpl : public Lexer
     {
         if (!isidhead(current))
         {
-            throw ParseError("unexpected character :'") << current << "' line:" << line << " column:" << column;
+            throw Exception("unexpected character :'",current,"' line:",line," column:",column);
         }
         buffer.clear();
         buffer.push_back(current);
@@ -463,11 +466,11 @@ class LexerImpl : public Lexer
         }
         if (isdelimiter(current))
         {
-            throw ParseError("raw string delimiter longer than ") << max_delimiter_length << " characters : line:" << line << " column:" << column;
+            throw Exception("raw string delimiter longer than ",max_delimiter_length," characters : line:",line," column:",column);
         }
         if (current != '(')
         {
-            throw ParseError("invalid character in raw string delimiter :") << current << " line:" << line << " column:" << column;
+            throw Exception("invalid character in raw string delimiter :",current," line:",line," column:",column);
         }
         delimiter.push_back('"');
         current = Next();
@@ -476,7 +479,7 @@ class LexerImpl : public Lexer
         {
             if (current == EOF)
             {
-                throw ParseError("incomplete raw string at <eof>");
+                throw Exception("incomplete raw string at <eof>");
             }
             while (current != ')' && current != EOF)
             {
@@ -562,7 +565,7 @@ class LexerImpl : public Lexer
 
         if (!finished)
         {
-            throw ParseError("comment unclosed at <eof>");
+            throw Exception("comment unclosed at <eof>");
         }
         return CommentToken(buffer);
     }
@@ -620,13 +623,13 @@ class LexerImpl : public Lexer
             }
             else
             {
-                throw ParseError("unexpected digit '") << current << "' in binary number literal at line:" << line << " column:" << column;
+                throw Exception("unexpected digit '",current,"' in binary number literal at line:",line," column:",column);
             }
         }
 
         if (!has_digit)
         {
-            throw ParseError("expect digit after binary number literal prefix at line:") << line << " column:" << column;
+            throw Exception("expect digit after binary number literal prefix at line:",line," column:",column);
         }
         else if (buffer.empty())
         {
@@ -645,11 +648,11 @@ class LexerImpl : public Lexer
         }
         else if (isidhead(current))
         {
-            throw ParseError("unexpected character '") << current << "' after binary number literal at line:" << line << " column:" << column;
+            throw Exception("unexpected character '",current,"' after binary number literal at line:",line," column:",column);
         }
         else if (current == '.')
         {
-            throw ParseError("unexpected '.' in binary number literal at line:") << line << " column:" << column;
+            throw Exception("unexpected '.' in binary number literal at line:",line," column:",column);
         }
         current = Next();
         if (should_match_bit)
@@ -657,7 +660,7 @@ class LexerImpl : public Lexer
             bit = ParseBit();
             if (buffer.length() > bit)
             {
-                throw ParseError("binary number literal is out of range at line:") << line << " column:" << column;
+                throw Exception("binary number literal is out of range at line:",line," column:",column);
             }
         }
         else
@@ -673,7 +676,7 @@ class LexerImpl : public Lexer
             }
             else
             {
-                throw ParseError("binary number literal is out of range at line:") << line << " column:" << column;
+                throw Exception("binary number literal is out of range at line:",line," column:",column);
             }
         }
 
@@ -735,7 +738,7 @@ class LexerImpl : public Lexer
             }
             else
             {
-                throw ParseError("unexpected digit '") << current << "' in octal number literal at line:" << line << " column:" << column;
+                throw Exception("unexpected digit '",current,"' in octal number literal at line:",line," column:",column);
             }
         }
         bool should_match_bit = false;
@@ -750,11 +753,11 @@ class LexerImpl : public Lexer
         }
         else if (isidhead(current))
         {
-            throw ParseError("unexpected character '") << current << "' after octal number literal at line:" << line << " column:" << column;
+            throw Exception("unexpected character '",current,"' after octal number literal at line:",line," column:",column);
         }
         else if (current == '.')
         {
-            throw ParseError("unexpected '.' in octal number literal at line:") << line << " column:" << column;
+            throw Exception("unexpected '.' in octal number literal at line:",line," column:",column);
         }
         current = Next();
         if (should_match_bit)
@@ -809,7 +812,7 @@ class LexerImpl : public Lexer
             }
         }
         errno = 0;
-        throw ParseError("octal number literal is out of range at line:") << line << " column:" << column;
+        throw Exception("octal number literal is out of range at line:",line," column:",column);
     }
 
     Token DecHexNumberToken(ERadix radix)
@@ -826,7 +829,7 @@ class LexerImpl : public Lexer
             {
                 if (has_point)
                 {
-                    throw ParseError("multiple '.' in number literal at line:") << line << " column:" << column;
+                    throw Exception("multiple '.' in number literal at line:",line," column:",column);
                 }
                 else
                 {
@@ -859,7 +862,7 @@ class LexerImpl : public Lexer
             }
             if (!has_exponent)
             {
-                throw ParseError("expect exponent digit at line:") << line << " column:" << column;
+                throw Exception("expect exponent digit at line:",line," column:",column);
             }
         }
         if (isfloat(current))
@@ -871,14 +874,14 @@ class LexerImpl : public Lexer
             }
             else
             {
-                throw ParseError("unexpected '") << current << "' after integer literal at line:" << line << " column:" << column;
+                throw Exception("unexpected '",current,"' after integer literal at line:",line," column:",column);
             }
         }
         else if (isunsigned(current))
         {
             if (has_point || has_exponent)
             {
-                throw ParseError("unexpected '") << current << "' after float literal at line:" << line << " column:" << column;
+                throw Exception("unexpected '",current,"' after float literal at line:",line," column:",column);
             }
             is_signed = false;
             should_match_bit = true;
@@ -887,13 +890,13 @@ class LexerImpl : public Lexer
         {
             if (has_point || has_exponent)
             {
-                throw ParseError("unexpected '") << current << "' after float literal at line:" << line << " column:" << column;
+                throw Exception("unexpected '",current,"' after float literal at line:",line," column:",column);
             }
             should_match_bit = true;
         }
         else if (isidhead(current))
         {
-            throw ParseError("unexpected '") << current << "' after number literal at line:" << line << " column:" << column;
+            throw Exception("unexpected '",current,"' after number literal at line:",line," column:",column);
         }
         if (should_match_bit)
         {
@@ -971,7 +974,7 @@ class LexerImpl : public Lexer
             }
         }
         errno = 0;
-        throw ParseError("number literal is out of range at line:") << line << " column:" << column;
+        throw Exception("number literal is out of range at line:",line," column:",column);
     }
 
     template <typename Number8T, typename Number16T, typename Number32T, typename Number64T>
@@ -1036,7 +1039,7 @@ class LexerImpl : public Lexer
         }
         else
         {
-            throw ParseError("unexpected postfix bit after number literal at line:") << line << " column:" << column;
+            throw Exception("unexpected postfix bit after number literal at line:",line," column:",column);
         }
         if (nextnext)
         {
@@ -1044,7 +1047,7 @@ class LexerImpl : public Lexer
         }
         if (isidbody(next))
         {
-            throw ParseError("unexpected postfix character '") << next << "' after number literal at line:" << line << " column:" << column;
+            throw Exception("unexpected postfix character '",next,"' after number literal at line:",line," column:",column);
         }
         else
         {
@@ -1104,4 +1107,4 @@ std::unique_ptr<Lexer> Lexer::GetLexer(std::istream &code)
 {
     return std::make_unique<LexerImpl>(code);
 }
-} // namespace cdscript
+} // namespace cd::script

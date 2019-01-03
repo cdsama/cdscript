@@ -6,7 +6,7 @@
 #pragma once
 #include "syntax.hpp"
 
-namespace cdscript
+namespace cd::script
 {
 
 class Visitor
@@ -17,4 +17,4 @@ class Visitor
     virtual void Visit(LiteralValue *syntax, std::any &data) = 0;
 };
 
-} // namespace cdscript
+} // namespace cd::script

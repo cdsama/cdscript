@@ -8,7 +8,7 @@
 #include <memory>
 #include <sstream>
 
-namespace cdscript
+namespace cd::script
 {
 class Lexer
 {
@@ -41,4 +41,4 @@ class Lexer
     [[nodiscard]] static std::unique_ptr<Lexer> GetLexer(std::istream &code);
 };
 
-} // namespace cdscript
+} // namespace cd::script

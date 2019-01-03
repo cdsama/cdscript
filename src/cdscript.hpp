@@ -7,9 +7,9 @@
 #include <cstdint>
 #include <string>
 
-namespace cdscript
+namespace cd::script
 {
 using integer_t = int64_t;
 using number_t = double;
 using string_t = std::string;
-} // namespace cdscript
+} // namespace cd::script

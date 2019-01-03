@@ -8,8 +8,9 @@
 #include "lexer.hpp"
 #include "syntax.hpp"
 #include "parser.hpp"
+#include "utils.hpp"
 
-namespace cdscript
+namespace cd::script
 {
 
 class ParserImpl : public Parser
@@ -189,4 +190,4 @@ std::unique_ptr<Parser> Parser::GetParser(std::unique_ptr<Lexer> &lexer)
 {
     return std::make_unique<ParserImpl>(lexer);
 }
-} // namespace cdscript
+} // namespace cd::script

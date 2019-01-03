@@ -1,6 +1,6 @@
 #include "catch2_ext.hpp"
 #include "lexer.hpp"
-using namespace cdscript;
+using namespace cd::script;
 
 template <typename T>
 Token MockNumberToken(T t)
@@ -127,57 +127,57 @@ TEST_CASE("Lexer-Number-Bin-Exceptions", "[core][lexer][number]")
     {
         std::istringstream code("0b");
         auto lexer = Lexer::GetLexer(code);
-        CHECK_THROWS_MATCHES(lexer->GetToken(), Lexer::ParseError, WhatEquals("expect digit after binary number literal prefix at line:1 column:2"));
+        CHECK_THROWS_MATCHES(lexer->GetToken(), Exception, WhatEquals("expect digit after binary number literal prefix at line:1 column:2"));
     }
     {
         std::istringstream code("0bi8");
         auto lexer = Lexer::GetLexer(code);
-        CHECK_THROWS_MATCHES(lexer->GetToken(), Lexer::ParseError, WhatEquals("expect digit after binary number literal prefix at line:1 column:3"));
+        CHECK_THROWS_MATCHES(lexer->GetToken(), Exception, WhatEquals("expect digit after binary number literal prefix at line:1 column:3"));
     }
     {
         std::istringstream code("0b2");
         auto lexer = Lexer::GetLexer(code);
-        CHECK_THROWS_MATCHES(lexer->GetToken(), Lexer::ParseError, WhatEquals("unexpected digit '2' in binary number literal at line:1 column:3"));
+        CHECK_THROWS_MATCHES(lexer->GetToken(), Exception, WhatEquals("unexpected digit '2' in binary number literal at line:1 column:3"));
     }
     {
         std::istringstream code("0b1x");
         auto lexer = Lexer::GetLexer(code);
-        CHECK_THROWS_MATCHES(lexer->GetToken(), Lexer::ParseError, WhatEquals("unexpected character 'x' after binary number literal at line:1 column:4"));
+        CHECK_THROWS_MATCHES(lexer->GetToken(), Exception, WhatEquals("unexpected character 'x' after binary number literal at line:1 column:4"));
     }
     {
         std::istringstream code("0b1001.101");
         auto lexer = Lexer::GetLexer(code);
-        CHECK_THROWS_MATCHES(lexer->GetToken(), Lexer::ParseError, WhatEquals("unexpected '.' in binary number literal at line:1 column:7"));
+        CHECK_THROWS_MATCHES(lexer->GetToken(), Exception, WhatEquals("unexpected '.' in binary number literal at line:1 column:7"));
     }
     {
         std::istringstream code("0b100111011i8");
         auto lexer = Lexer::GetLexer(code);
-        CHECK_THROWS_MATCHES(lexer->GetToken(), Lexer::ParseError, WhatEquals("binary number literal is out of range at line:1 column:13"));
+        CHECK_THROWS_MATCHES(lexer->GetToken(), Exception, WhatEquals("binary number literal is out of range at line:1 column:13"));
     }
     {
         std::istringstream code("0b11111111111111111111111111111111111111111111111111111111111111111");
         auto lexer = Lexer::GetLexer(code);
-        CHECK_THROWS_MATCHES(lexer->GetToken(), Lexer::ParseError, WhatEquals("binary number literal is out of range at line:1 column:67"));
+        CHECK_THROWS_MATCHES(lexer->GetToken(), Exception, WhatEquals("binary number literal is out of range at line:1 column:67"));
     }
     {
         std::istringstream code("0b100111011i88");
         auto lexer = Lexer::GetLexer(code);
-        CHECK_THROWS_MATCHES(lexer->GetToken(), Lexer::ParseError, WhatEquals("unexpected postfix character '8' after number literal at line:1 column:14"));
+        CHECK_THROWS_MATCHES(lexer->GetToken(), Exception, WhatEquals("unexpected postfix character '8' after number literal at line:1 column:14"));
     }
     {
         std::istringstream code("0b10011101_i8");
         auto lexer = Lexer::GetLexer(code);
-        CHECK_THROWS_MATCHES(lexer->GetToken(), Lexer::ParseError, WhatEquals("unexpected character '_' after binary number literal at line:1 column:11"));
+        CHECK_THROWS_MATCHES(lexer->GetToken(), Exception, WhatEquals("unexpected character '_' after binary number literal at line:1 column:11"));
     }
     {
         std::istringstream code("0b100111011i65");
         auto lexer = Lexer::GetLexer(code);
-        CHECK_THROWS_MATCHES(lexer->GetToken(), Lexer::ParseError, WhatEquals("unexpected postfix bit after number literal at line:1 column:14"));
+        CHECK_THROWS_MATCHES(lexer->GetToken(), Exception, WhatEquals("unexpected postfix bit after number literal at line:1 column:14"));
     }
     {
         std::istringstream code("0b100111011i64_");
         auto lexer = Lexer::GetLexer(code);
-        CHECK_THROWS_MATCHES(lexer->GetToken(), Lexer::ParseError, WhatEquals("unexpected postfix character '_' after number literal at line:1 column:15"));
+        CHECK_THROWS_MATCHES(lexer->GetToken(), Exception, WhatEquals("unexpected postfix character '_' after number literal at line:1 column:15"));
     }
 }
 
@@ -252,37 +252,37 @@ TEST_CASE("Lexer-Number-Oct-Exceptions", "[core][lexer][number]")
     {
         std::istringstream code("09");
         auto lexer = Lexer::GetLexer(code);
-        CHECK_THROWS_MATCHES(lexer->GetToken(), Lexer::ParseError, WhatEquals("unexpected digit '9' in octal number literal at line:1 column:2"));
+        CHECK_THROWS_MATCHES(lexer->GetToken(), Exception, WhatEquals("unexpected digit '9' in octal number literal at line:1 column:2"));
     }
     {
         std::istringstream code("03x");
         auto lexer = Lexer::GetLexer(code);
-        CHECK_THROWS_MATCHES(lexer->GetToken(), Lexer::ParseError, WhatEquals("unexpected character 'x' after octal number literal at line:1 column:3"));
+        CHECK_THROWS_MATCHES(lexer->GetToken(), Exception, WhatEquals("unexpected character 'x' after octal number literal at line:1 column:3"));
     }
     {
         std::istringstream code("02.3");
         auto lexer = Lexer::GetLexer(code);
-        CHECK_THROWS_MATCHES(lexer->GetToken(), Lexer::ParseError, WhatEquals("unexpected '.' in octal number literal at line:1 column:3"));
+        CHECK_THROWS_MATCHES(lexer->GetToken(), Exception, WhatEquals("unexpected '.' in octal number literal at line:1 column:3"));
     }
     {
         std::istringstream code("077777i8");
         auto lexer = Lexer::GetLexer(code);
-        CHECK_THROWS_MATCHES(lexer->GetToken(), Lexer::ParseError, WhatEquals("octal number literal is out of range at line:1 column:8"));
+        CHECK_THROWS_MATCHES(lexer->GetToken(), Exception, WhatEquals("octal number literal is out of range at line:1 column:8"));
     }
     {
         std::istringstream code("0777777777777777777777777777777777777777777");
         auto lexer = Lexer::GetLexer(code);
-        CHECK_THROWS_MATCHES(lexer->GetToken(), Lexer::ParseError, WhatEquals("octal number literal is out of range at line:1 column:43"));
+        CHECK_THROWS_MATCHES(lexer->GetToken(), Exception, WhatEquals("octal number literal is out of range at line:1 column:43"));
     }
     {
         std::istringstream code("0777777777777777777777777777777777777777777i64");
         auto lexer = Lexer::GetLexer(code);
-        CHECK_THROWS_MATCHES(lexer->GetToken(), Lexer::ParseError, WhatEquals("octal number literal is out of range at line:1 column:46"));
+        CHECK_THROWS_MATCHES(lexer->GetToken(), Exception, WhatEquals("octal number literal is out of range at line:1 column:46"));
     }
     {
         std::istringstream code("0777777777777777777777777777777777777777777u64");
         auto lexer = Lexer::GetLexer(code);
-        CHECK_THROWS_MATCHES(lexer->GetToken(), Lexer::ParseError, WhatEquals("octal number literal is out of range at line:1 column:46"));
+        CHECK_THROWS_MATCHES(lexer->GetToken(), Exception, WhatEquals("octal number literal is out of range at line:1 column:46"));
     }
 }
 
@@ -451,82 +451,82 @@ TEST_CASE("Lexer-Number-Dec-Hex-Exceptions", "[core][lexer][number]")
     {
         std::istringstream code("0..9");
         auto lexer = Lexer::GetLexer(code);
-        CHECK_THROWS_MATCHES(lexer->GetToken(), Lexer::ParseError, WhatEquals("multiple '.' in number literal at line:1 column:3"));
+        CHECK_THROWS_MATCHES(lexer->GetToken(), Exception, WhatEquals("multiple '.' in number literal at line:1 column:3"));
     }
     {
         std::istringstream code("0x0..9");
         auto lexer = Lexer::GetLexer(code);
-        CHECK_THROWS_MATCHES(lexer->GetToken(), Lexer::ParseError, WhatEquals("multiple '.' in number literal at line:1 column:5"));
+        CHECK_THROWS_MATCHES(lexer->GetToken(), Exception, WhatEquals("multiple '.' in number literal at line:1 column:5"));
     }
     {
         std::istringstream code("0.1ex");
         auto lexer = Lexer::GetLexer(code);
-        CHECK_THROWS_MATCHES(lexer->GetToken(), Lexer::ParseError, WhatEquals("expect exponent digit at line:1 column:5"));
+        CHECK_THROWS_MATCHES(lexer->GetToken(), Exception, WhatEquals("expect exponent digit at line:1 column:5"));
     }
     {
         std::istringstream code("0x0.1px");
         auto lexer = Lexer::GetLexer(code);
-        CHECK_THROWS_MATCHES(lexer->GetToken(), Lexer::ParseError, WhatEquals("expect exponent digit at line:1 column:7"));
+        CHECK_THROWS_MATCHES(lexer->GetToken(), Exception, WhatEquals("expect exponent digit at line:1 column:7"));
     }
     {
         std::istringstream code("0x0.1p2fx");
         auto lexer = Lexer::GetLexer(code);
-        CHECK_THROWS_MATCHES(lexer->GetToken(), Lexer::ParseError, WhatEquals("unexpected 'x' after number literal at line:1 column:9"));
+        CHECK_THROWS_MATCHES(lexer->GetToken(), Exception, WhatEquals("unexpected 'x' after number literal at line:1 column:9"));
     }
     {
         std::istringstream code("1f");
         auto lexer = Lexer::GetLexer(code);
-        CHECK_THROWS_MATCHES(lexer->GetToken(), Lexer::ParseError, WhatEquals("unexpected 'f' after integer literal at line:1 column:2"));
+        CHECK_THROWS_MATCHES(lexer->GetToken(), Exception, WhatEquals("unexpected 'f' after integer literal at line:1 column:2"));
     }
     {
         std::istringstream code("1.0i32");
         auto lexer = Lexer::GetLexer(code);
-        CHECK_THROWS_MATCHES(lexer->GetToken(), Lexer::ParseError, WhatEquals("unexpected 'i' after float literal at line:1 column:4"));
+        CHECK_THROWS_MATCHES(lexer->GetToken(), Exception, WhatEquals("unexpected 'i' after float literal at line:1 column:4"));
     }
     {
         std::istringstream code("0x1.0u32");
         auto lexer = Lexer::GetLexer(code);
-        CHECK_THROWS_MATCHES(lexer->GetToken(), Lexer::ParseError, WhatEquals("unexpected 'u' after float literal at line:1 column:6"));
+        CHECK_THROWS_MATCHES(lexer->GetToken(), Exception, WhatEquals("unexpected 'u' after float literal at line:1 column:6"));
     }
 
     {
         std::istringstream code("1.0x");
         auto lexer = Lexer::GetLexer(code);
-        CHECK_THROWS_MATCHES(lexer->GetToken(), Lexer::ParseError, WhatEquals("unexpected 'x' after number literal at line:1 column:4"));
+        CHECK_THROWS_MATCHES(lexer->GetToken(), Exception, WhatEquals("unexpected 'x' after number literal at line:1 column:4"));
     }
     {
         std::istringstream code("0x1.0x");
         auto lexer = Lexer::GetLexer(code);
-        CHECK_THROWS_MATCHES(lexer->GetToken(), Lexer::ParseError, WhatEquals("unexpected 'x' after number literal at line:1 column:6"));
+        CHECK_THROWS_MATCHES(lexer->GetToken(), Exception, WhatEquals("unexpected 'x' after number literal at line:1 column:6"));
     }
     {
         std::istringstream code("0xffi8");
         auto lexer = Lexer::GetLexer(code);
-        CHECK_THROWS_MATCHES(lexer->GetToken(), Lexer::ParseError, WhatEquals("number literal is out of range at line:1 column:6"));
+        CHECK_THROWS_MATCHES(lexer->GetToken(), Exception, WhatEquals("number literal is out of range at line:1 column:6"));
     }
     {
         std::istringstream code("0xffffffffffffffffffffffff");
         auto lexer = Lexer::GetLexer(code);
-        CHECK_THROWS_MATCHES(lexer->GetToken(), Lexer::ParseError, WhatEquals("number literal is out of range at line:1 column:26"));
+        CHECK_THROWS_MATCHES(lexer->GetToken(), Exception, WhatEquals("number literal is out of range at line:1 column:26"));
     }
     {
         std::istringstream code("3.812823466e+38F");
         auto lexer = Lexer::GetLexer(code);
-        CHECK_THROWS_MATCHES(lexer->GetToken(), Lexer::ParseError, WhatEquals("number literal is out of range at line:1 column:16"));
+        CHECK_THROWS_MATCHES(lexer->GetToken(), Exception, WhatEquals("number literal is out of range at line:1 column:16"));
     }
     {
         std::istringstream code("4e+380");
         auto lexer = Lexer::GetLexer(code);
-        CHECK_THROWS_MATCHES(lexer->GetToken(), Lexer::ParseError, WhatEquals("number literal is out of range at line:1 column:6"));
+        CHECK_THROWS_MATCHES(lexer->GetToken(), Exception, WhatEquals("number literal is out of range at line:1 column:6"));
     }
     {
         std::istringstream code("999999999999999999999i64");
         auto lexer = Lexer::GetLexer(code);
-        CHECK_THROWS_MATCHES(lexer->GetToken(), Lexer::ParseError, WhatEquals("number literal is out of range at line:1 column:24"));
+        CHECK_THROWS_MATCHES(lexer->GetToken(), Exception, WhatEquals("number literal is out of range at line:1 column:24"));
     }
     {
         std::istringstream code("999999999999999999999u64");
         auto lexer = Lexer::GetLexer(code);
-        CHECK_THROWS_MATCHES(lexer->GetToken(), Lexer::ParseError, WhatEquals("number literal is out of range at line:1 column:24"));
+        CHECK_THROWS_MATCHES(lexer->GetToken(), Exception, WhatEquals("number literal is out of range at line:1 column:24"));
     }
 }

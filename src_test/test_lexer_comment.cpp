@@ -1,6 +1,6 @@
 #include "catch2_ext.hpp"
 #include "lexer.hpp"
-using namespace cdscript;
+using namespace cd::script;
 TEST_CASE("Lexer-Comment-SingleLine", "[core][lexer][comment]")
 {
     {
@@ -68,11 +68,11 @@ TEST_CASE("Lexer-Comment-MultiLine", "[core][lexer][comment]")
     {
         std::istringstream code("/*abc\r\n//abcd");
         auto lexer = Lexer::GetLexer(code);
-        CHECK_THROWS_MATCHES(lexer->GetToken(), Lexer::ParseError, WhatEquals("comment unclosed at <eof>"));
+        CHECK_THROWS_MATCHES(lexer->GetToken(), Exception, WhatEquals("comment unclosed at <eof>"));
     }
     {
         std::istringstream code("/*abc\r\n//abcd****\n***xyz***\r***");
         auto lexer = Lexer::GetLexer(code);
-        CHECK_THROWS_MATCHES(lexer->GetToken(), Lexer::ParseError, WhatEquals("comment unclosed at <eof>"));
+        CHECK_THROWS_MATCHES(lexer->GetToken(), Exception, WhatEquals("comment unclosed at <eof>"));
     }
 }

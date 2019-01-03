@@ -6,7 +6,7 @@
 #include "syntax.hpp"
 #include "visitor.hpp"
 
-namespace cdscript
+namespace cd::script
 {
 #define IMPL_VISIT_FUNC(__CLASS_NAME__) \
     void __CLASS_NAME__::Visit(Visitor *visitor, std::any &data) { visitor->Visit(this, data); }
@@ -14,4 +14,4 @@ namespace cdscript
 IMPL_VISIT_FUNC(BinaryExpression)
 IMPL_VISIT_FUNC(LiteralValue)
 
-} // namespace cdscript
+} // namespace cd::script

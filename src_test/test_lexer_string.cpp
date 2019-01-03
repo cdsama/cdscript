@@ -5,7 +5,7 @@
 #include <limits>
 #include <iostream>
 
-using namespace cdscript;
+using namespace cd::script;
 
 TEST_CASE("Lexer-String", "[core][lexer][string]")
 {
@@ -72,37 +72,37 @@ TEST_CASE("Lexer-String-Exception", "[core][lexer][string]")
     {
         std::istringstream code("\"\n\"");
         auto lexer = Lexer::GetLexer(code);
-        CHECK_THROWS_MATCHES(lexer->GetToken(), Lexer::ParseError, WhatEquals("incomplete string at line:1 column:2"));
+        CHECK_THROWS_MATCHES(lexer->GetToken(), Exception, WhatEquals("incomplete string at line:1 column:2"));
     }
     {
         std::istringstream code("'\n'");
         auto lexer = Lexer::GetLexer(code);
-        CHECK_THROWS_MATCHES(lexer->GetToken(), Lexer::ParseError, WhatEquals("incomplete string at line:1 column:2"));
+        CHECK_THROWS_MATCHES(lexer->GetToken(), Exception, WhatEquals("incomplete string at line:1 column:2"));
     }
     {
         std::istringstream code("\"");
         auto lexer = Lexer::GetLexer(code);
-        CHECK_THROWS_MATCHES(lexer->GetToken(), Lexer::ParseError, WhatEquals("incomplete string at <eof>"));
+        CHECK_THROWS_MATCHES(lexer->GetToken(), Exception, WhatEquals("incomplete string at <eof>"));
     }
     {
         std::istringstream code("'");
         auto lexer = Lexer::GetLexer(code);
-        CHECK_THROWS_MATCHES(lexer->GetToken(), Lexer::ParseError, WhatEquals("incomplete string at <eof>"));
+        CHECK_THROWS_MATCHES(lexer->GetToken(), Exception, WhatEquals("incomplete string at <eof>"));
     }
     {
         std::istringstream code(R"#("\xxx")#");
         auto lexer = Lexer::GetLexer(code);
-        CHECK_THROWS_MATCHES(lexer->GetToken(), Lexer::ParseError, WhatEquals(R"#(unexpected character after '\x' line:1 column:4)#"));
+        CHECK_THROWS_MATCHES(lexer->GetToken(), Exception, WhatEquals(R"#(unexpected character after '\x' line:1 column:4)#"));
     }
     {
         std::istringstream code(R"#("\256")#");
         auto lexer = Lexer::GetLexer(code);
-        CHECK_THROWS_MATCHES(lexer->GetToken(), Lexer::ParseError, WhatEquals(R"#(decimal escape too large near \256 line:1 column:6)#"));
+        CHECK_THROWS_MATCHES(lexer->GetToken(), Exception, WhatEquals(R"#(decimal escape too large near \256 line:1 column:6)#"));
     }
     {
         std::istringstream code(R"#("\p")#");
         auto lexer = Lexer::GetLexer(code);
-        CHECK_THROWS_MATCHES(lexer->GetToken(), Lexer::ParseError, WhatEquals(R"#(unexpected character after '\' line:1 column:3)#"));
+        CHECK_THROWS_MATCHES(lexer->GetToken(), Exception, WhatEquals(R"#(unexpected character after '\' line:1 column:3)#"));
     }
 }
 
@@ -132,16 +132,16 @@ TEST_CASE("Lexer-String-Raw", "[core][lexer][string]")
     {
         std::istringstream code(R"#(R"_________________()_________________")#");
         auto lexer = Lexer::GetLexer(code);
-        CHECK_THROWS_MATCHES(lexer->GetToken(), Lexer::ParseError, WhatEquals(R"#(raw string delimiter longer than 16 characters : line:1 column:19)#"));
+        CHECK_THROWS_MATCHES(lexer->GetToken(), Exception, WhatEquals(R"#(raw string delimiter longer than 16 characters : line:1 column:19)#"));
     }
     {
         std::istringstream code(R"#(R"@()@")#");
         auto lexer = Lexer::GetLexer(code);
-        CHECK_THROWS_MATCHES(lexer->GetToken(), Lexer::ParseError, WhatEquals(R"#(invalid character in raw string delimiter :@ line:1 column:3)#"));
+        CHECK_THROWS_MATCHES(lexer->GetToken(), Exception, WhatEquals(R"#(invalid character in raw string delimiter :@ line:1 column:3)#"));
     }
     {
         std::istringstream code(R"#(R"()@")#");
         auto lexer = Lexer::GetLexer(code);
-        CHECK_THROWS_MATCHES(lexer->GetToken(), Lexer::ParseError, WhatEquals(R"#(incomplete raw string at <eof>)#"));
+        CHECK_THROWS_MATCHES(lexer->GetToken(), Exception, WhatEquals(R"#(incomplete raw string at <eof>)#"));
     }
 }

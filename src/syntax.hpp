@@ -8,7 +8,7 @@
 #include <any>
 #include "token.hpp"
 
-namespace cdscript
+namespace cd::script
 {
 class Visitor;
 class Syntax
@@ -45,4 +45,4 @@ class LiteralValue : public Syntax
     DECL_VISIT_FUNC();
 };
 
-} // namespace cdscript
+} // namespace cd::script

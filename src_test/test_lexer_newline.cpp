@@ -1,6 +1,6 @@
 #include "catch2_ext.hpp"
 #include "lexer.hpp"
-using namespace cdscript;
+using namespace cd::script;
 TEST_CASE("Lexer-NewLine", "[core][lexer][newline]")
 {
     {

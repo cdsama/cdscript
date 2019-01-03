@@ -9,7 +9,7 @@
 #include <string>
 #include <map>
 #include "cdscript.hpp"
-namespace cdscript
+namespace cd::script
 {
 template <typename T>
 struct SupportedNumberType
@@ -179,4 +179,4 @@ struct Token
     }
 };
 
-} // namespace cdscript
+} // namespace cd::script

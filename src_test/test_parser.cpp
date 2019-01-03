@@ -9,7 +9,7 @@
 #include "parser.hpp"
 #include "visitor.hpp"
 
-using namespace cdscript;
+using namespace cd::script;
 
 enum class ESyntax
 {

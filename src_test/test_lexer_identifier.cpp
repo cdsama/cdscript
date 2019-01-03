@@ -1,6 +1,6 @@
 #include "catch2_ext.hpp"
 #include "lexer.hpp"
-using namespace cdscript;
+using namespace cd::script;
 TEST_CASE("Lexer-Identifier", "[core][lexer][newline]")
 {
     {
@@ -13,6 +13,6 @@ TEST_CASE("Lexer-Identifier", "[core][lexer][newline]")
     {
         std::istringstream code("\a\b");
         auto lexer = Lexer::GetLexer(code);
-        CHECK_THROWS_MATCHES(lexer->GetToken(), Lexer::ParseError, WhatEquals("unexpected character :'\a' line:1 column:1"));
+        CHECK_THROWS_MATCHES(lexer->GetToken(), Exception, WhatEquals("unexpected character :'\a' line:1 column:1"));
     }
 }
