@@ -6,10 +6,14 @@ if ! [[ -e vcpkg/vcpkg ]];then
     bash ./bootstrap-vcpkg.sh
 else
     cd vcpkg
+    git fetch origin master
     UPSTREAM=${1:-'@{u}'}
     LOCAL=$(git rev-parse @)
     REMOTE=$(git rev-parse "$UPSTREAM")
     BASE=$(git merge-base @ "$UPSTREAM")
+    echo "Local: ${LOCAL}"
+    echo "REMOTE: ${REMOTE}"
+    echo "BASE: ${BASE}"
     if [[ "${LOCAL}" = "${REMOTE}" ]]; then
         echo "Up-to-date"
     elif [[ "${LOCAL}" = "${BASE}" ]]; then
