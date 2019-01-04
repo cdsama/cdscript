@@ -1,3 +1,8 @@
+// Copyright (c) 2019 chendi
+// 
+// This software is released under the MIT License.
+// https://opensource.org/licenses/MIT
+
 #pragma once
 #include <catch2/catch.hpp>
 #include "utils.hpp"
