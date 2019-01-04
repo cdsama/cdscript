@@ -4,54 +4,79 @@
 
 using namespace cd::serialize;
 
-class Color
+struct Types
 {
-  public:
-    int8_t r = 0;
-    int8_t g = 0;
+    bool b = false;
+    int8_t i8 = 0;
+    int16_t i16 = 0;
+    int32_t i32 = 0;
+    int64_t i64 = 0;
+    uint8_t u8 = 0;
+    uint16_t u16 = 0;
+    uint32_t u32 = 0;
+    uint64_t u64 = 0;
 
-    Color(int8_t _r, int8_t _g, int8_t _b)
-        : r(_r), g(_g), b(_b)
+    friend bool operator==(const Types &lhs, const Types &rhs)
     {
+        return ((lhs.b == rhs.b) &&
+                (lhs.i8 == rhs.i8) &&
+                (lhs.i16 == rhs.i16) &&
+                (lhs.i32 == rhs.i32) &&
+                (lhs.i64 == rhs.i64) &&
+                (lhs.u8 == rhs.u8) &&
+                (lhs.u16 == rhs.u16) &&
+                (lhs.u32 == rhs.u32) &&
+                (lhs.u64 == rhs.u64));
     }
 
-    int8_t get_b()
-    {
-        return b;
-    }
-
-  private:
-    int8_t b = 0;
-
-  public:
     template <typename Archive>
-    friend Archive &operator<<(Archive &ar, Color &c)
+    friend Archive &operator<<(Archive &ar, Types &t)
     {
-        ar << c.r << c.g << c.b;
-        if constexpr (Archive::Loading)
-        {
-            std::cout << "loading" << std::endl;
-        }
-        if constexpr (Archive::Saving)
-        {
-            std::cout << "saving" << std::endl;
-        }
+        ar << t.b << t.i8 << t.i16 << t.i32 << t.i64 << t.u8 << t.u16 << t.u32 << t.u64;
         return ar;
     }
 };
 
 TEST_CASE("Serialize-Basic", "[core][serialize]")
 {
-    Color c = {1, 2, 3};
-    std::ostringstream os;
-    Archive<Writer> ar(os);
-    ar << c;
-    Color d = {0, 0, 0};
-    REQUIRE(os.str().size() == 3);
-    std::istringstream is(os.str());
-    Archive<Reader> ar2(is);
-    ar2 << d;
-    CHECK(c.r == d.r);
-    CHECK(c.g == d.g);
-    CHECK(c.get_b() == d.get_b());
+    Types t1 = {false, -1, -2, -3, -4, 1, 2, 3, 4};
+    std::stringstream ss;
+    Archive<Writer> ar(ss);
+    ar << t1;
+    Types t2;
+    Archive<Reader> ar2(ss);
+    ar2 << t2;
+    CHECK(t1 == t2);
+}
+
+struct Strings
+{
+    std::string s1;
+    std::wstring s2;
+    std::u16string s3;
+    std::u32string s4;
+    friend bool operator==(const Strings &lhs, const Strings &rhs)
+    {
+        return ((lhs.s1 == rhs.s1) && (lhs.s2 == rhs.s2) && (lhs.s3 == rhs.s3) && (lhs.s4 == rhs.s4));
+    }
+    template <typename Archive>
+    friend Archive &operator<<(Archive &ar, Strings &s)
+    {
+        ar << s.s1 << s.s2 << s.s3 << s.s4;
+        return ar;
+    }
+};
+
+TEST_CASE("Serialize-String", "[core][serialize]")
+{
+    {
+        Strings s1 = {"Hello World!", L"你好世界！", u"ハローワールド", U"전 세계 여러분 안녕하세요"};
+        std::stringstream ss;
+        Archive<Writer> ar(ss);
+        ar << s1;
+        Archive<Reader> ar2(ss);
+        Strings s2;
+        ar2 << s2;
+        CHECK(s1 == s2);
+    }
 }

@@ -5,6 +5,7 @@
 
 #pragma once
 #include <iostream>
+#include <cstdint>
 #include "utils.hpp"
 namespace cd
 {
@@ -35,9 +36,13 @@ struct Traits<Writer>
     typedef std::ostream stream_type;
 };
 
+using serialize_size_t = std::uint64_t;
+
 template <EArchiveType ArchiveType>
 class Archive
 {
+    typename Traits<ArchiveType>::stream_type &stream;
+
   public:
     inline static const bool Loading = Traits<ArchiveType>::Loading;
     inline static const bool Saving = !Loading;
@@ -47,7 +52,34 @@ class Archive
     {
     }
 
-    void Binary(void *const data, std::size_t size)
+    template <typename T>
+    typename std::enable_if<std::is_arithmetic<T>::value, Archive>::type &operator<<(T &v)
+    {
+        BinaryIO(std::addressof(v), sizeof(T));
+        return *this;
+    }
+
+    template <class _Elem, class _Traits, class _Alloc>
+    Archive &operator<<(std::basic_string<_Elem, _Traits, _Alloc> &str)
+    {
+        if constexpr (Loading)
+        {
+            serialize_size_t size;
+            *this << size;
+            str.resize(static_cast<std::size_t>(size));
+            BinaryIO(const_cast<_Elem *>(str.data()), static_cast<std::size_t>(size) * sizeof(_Elem));
+        }
+        else
+        {
+            serialize_size_t size = str.size();
+            *this << size;
+            BinaryIO(str.data(), size * sizeof(_Elem));
+        }
+        return *this;
+    }
+
+  private:
+    void BinaryIO(void *const data, std::size_t size)
     {
         if constexpr (Loading)
         {
@@ -67,16 +99,6 @@ class Archive
             }
         }
     }
-
-    template <typename T>
-    typename std::enable_if<std::is_arithmetic<T>::value, Archive>::type &operator<<(T &v)
-    {
-        Binary(std::addressof(v), sizeof(T));
-        return *this;
-    }
-
-  private:
-    typename Traits<ArchiveType>::stream_type &stream;
 };
 
 } // namespace serialize
