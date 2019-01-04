@@ -32,7 +32,7 @@ class Color
         {
             std::cout << "loading" << std::endl;
         }
-        else
+        if constexpr (Archive::Saving)
         {
             std::cout << "saving" << std::endl;
         }
@@ -40,16 +40,16 @@ class Color
     }
 };
 
-TEST_CASE("Serialize", "[core][serialize]")
+TEST_CASE("Serialize-Basic", "[core][serialize]")
 {
     Color c = {1, 2, 3};
     std::ostringstream os;
-    ArchiveBinarySave ar(os);
+    Archive<Writer> ar(os);
     ar << c;
     Color d = {0, 0, 0};
     REQUIRE(os.str().size() == 3);
     std::istringstream is(os.str());
-    ArchiveBinaryLoad ar2(is);
+    Archive<Reader> ar2(is);
     ar2 << d;
     CHECK(c.r == d.r);
     CHECK(c.g == d.g);

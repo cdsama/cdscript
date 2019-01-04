@@ -10,63 +10,74 @@ namespace cd
 {
 namespace serialize
 {
-class ArchiveBinaryLoad
+enum EArchiveType
 {
-  public:
+    Reader,
+    Writer
+};
+
+template <EArchiveType ArchiveType>
+struct Traits
+{
+};
+
+template <>
+struct Traits<Reader>
+{
     inline static const bool Loading = true;
-    inline static const bool Saving = false;
-
-    ArchiveBinaryLoad(std::istream &_is)
-        : is(_is)
-    {
-    }
-    void load(void *const data, std::size_t size)
-    {
-        auto const readSize = static_cast<std::size_t>(is.rdbuf()->sgetn(reinterpret_cast<char *>(data), size));
-
-        if (readSize != size)
-        {
-            throw Exception("Failed to read ", size, " bytes from input stream! Read ", readSize);
-        }
-    }
-
-    template <typename T>
-    typename std::enable_if<std::is_arithmetic<T>::value, ArchiveBinaryLoad>::type &operator<<(T &v)
-    {
-        load(std::addressof(v), sizeof(T));
-        return *this;
-    }
-
-  private:
-    std::istream &is;
+    typedef std::istream stream_type;
 };
 
-class ArchiveBinarySave
+template <>
+struct Traits<Writer>
+{
+    inline static const bool Loading = false;
+    typedef std::ostream stream_type;
+};
+
+template <EArchiveType ArchiveType>
+class Archive
 {
   public:
-    inline static const bool Loading = false;
-    inline static const bool Saving = true;
-    ArchiveBinarySave(std::ostream &_os)
-        : os(_os)
+    inline static const bool Loading = Traits<ArchiveType>::Loading;
+    inline static const bool Saving = !Loading;
+
+    Archive(typename Traits<ArchiveType>::stream_type &_stream)
+        : stream(_stream)
     {
     }
-    void save(const void *data, std::size_t size)
+
+    void Binary(void *const data, std::size_t size)
     {
-        auto const writtenSize = static_cast<std::size_t>(os.rdbuf()->sputn(reinterpret_cast<const char *>(data), size));
-        if (writtenSize != size)
+        if constexpr (Loading)
         {
-            throw Exception("Failed to write ", size, " bytes to output stream! Wrote ", writtenSize);
+            auto const readSize = static_cast<std::size_t>(stream.rdbuf()->sgetn(reinterpret_cast<char *>(data), size));
+
+            if (readSize != size)
+            {
+                throw Exception("Failed to read ", size, " bytes from input stream! Read ", readSize);
+            }
+        }
+        else
+        {
+            auto const writtenSize = static_cast<std::size_t>(stream.rdbuf()->sputn(reinterpret_cast<const char *>(data), size));
+            if (writtenSize != size)
+            {
+                throw Exception("Failed to write ", size, " bytes to output stream! Wrote ", writtenSize);
+            }
         }
     }
+
     template <typename T>
-    typename std::enable_if<std::is_arithmetic<T>::value, ArchiveBinarySave>::type &operator<<(T &v)
+    typename std::enable_if<std::is_arithmetic<T>::value, Archive>::type &operator<<(T &v)
     {
-        save(std::addressof(v), sizeof(T));
+        Binary(std::addressof(v), sizeof(T));
         return *this;
     }
 
   private:
-    std::ostream &os;
+    typename Traits<ArchiveType>::stream_type &stream;
 };
+
 } // namespace serialize
 } // namespace cd
