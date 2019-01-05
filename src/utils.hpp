@@ -17,7 +17,7 @@ class Exception : public std::exception
     {
         std::ostringstream os;
         (os << ... << std::forward<Args>(args));
-        ss = std::move(os.str());
+        ss = os.str();
     }
 
     virtual const char *what() const noexcept override
