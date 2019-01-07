@@ -59,34 +59,34 @@ class Archive
         return *this;
     }
 
-    template <class _Elem, class _Traits, class _Alloc>
-    Archive &operator<<(std::basic_string<_Elem, _Traits, _Alloc> &str)
+    template <class _ElemT, class _Traits, class _Alloc>
+    Archive &operator<<(std::basic_string<_ElemT, _Traits, _Alloc> &str)
     {
         if constexpr (Loading)
         {
             serialize_size_t size;
             *this << size;
             str.resize(static_cast<std::size_t>(size));
-            BinaryIO(const_cast<_Elem *>(str.data()), static_cast<std::size_t>(size) * sizeof(_Elem));
+            BinaryIO(const_cast<_ElemT *>(str.data()), static_cast<std::size_t>(size) * sizeof(_ElemT));
         }
         else
         {
             serialize_size_t size = str.size();
             *this << size;
-            BinaryIO(str.data(), size * sizeof(_Elem));
+            BinaryIO(str.data(), size * sizeof(_ElemT));
         }
         return *this;
     }
 
-    template <class _Ty, class _Alloc>
-    Archive &operator<<([[maybe_unused]] std::vector<_Ty, _Alloc> &vec)
+    template <class _ElemT, class _Alloc>
+    Archive &operator<<(std::vector<_ElemT, _Alloc> &vec)
     {
         if constexpr (Loading)
         {
             serialize_size_t size;
             *this << size;
             vec.resize(static_cast<std::size_t>(size));
-            if constexpr (std::is_same<_Ty, bool>::value)
+            if constexpr (std::is_same<_ElemT, bool>::value)
             {
                 for (auto &&v : vec)
                 {
@@ -95,9 +95,9 @@ class Archive
                     v = b;
                 }
             }
-            else if constexpr (std::is_arithmetic<_Ty>::value)
+            else if constexpr (std::is_arithmetic<_ElemT>::value)
             {
-                BinaryIO(vec.data(), static_cast<std::size_t>(size) * sizeof(_Ty));
+                BinaryIO(vec.data(), static_cast<std::size_t>(size) * sizeof(_ElemT));
             }
             else
             {
@@ -111,7 +111,7 @@ class Archive
         {
             serialize_size_t size = vec.size();
             *this << size;
-            if constexpr (std::is_same<_Ty, bool>::value)
+            if constexpr (std::is_same<_ElemT, bool>::value)
             {
                 for (auto &&v : vec)
                 {
@@ -119,9 +119,9 @@ class Archive
                     *this << b;
                 }
             }
-            else if constexpr (std::is_arithmetic<_Ty>::value)
+            else if constexpr (std::is_arithmetic<_ElemT>::value)
             {
-                BinaryIO(vec.data(), size * sizeof(_Ty));
+                BinaryIO(vec.data(), size * sizeof(_ElemT));
             }
             else
             {
@@ -134,12 +134,12 @@ class Archive
         return *this;
     }
 
-    template <class _Tp, std::size_t _Size>
-    Archive &operator<<([[maybe_unused]] std::array<_Tp, _Size> &arr)
+    template <class _ElemT, std::size_t _Size>
+    Archive &operator<<(std::array<_ElemT, _Size> &arr)
     {
         if constexpr (Loading)
         {
-            if constexpr (std::is_arithmetic<_Tp>::value)
+            if constexpr (std::is_arithmetic<_ElemT>::value)
             {
                 BinaryIO(arr.data(), sizeof(arr));
             }
@@ -153,7 +153,7 @@ class Archive
         }
         else
         {
-            if constexpr (std::is_arithmetic<_Tp>::value)
+            if constexpr (std::is_arithmetic<_ElemT>::value)
             {
                 BinaryIO(arr.data(), sizeof(arr));
             }
@@ -163,6 +163,31 @@ class Archive
                 {
                     *this << v;
                 }
+            }
+        }
+        return *this;
+    }
+
+    template <class _ElemT, class _Alloc>
+    Archive &operator<<(std::list<_ElemT, _Alloc> &li)
+    {
+        if constexpr (Loading)
+        {
+            serialize_size_t size;
+            *this << size;
+            li.resize(static_cast<std::size_t>(size));
+            for (auto &&v : li)
+            {
+                *this << v;
+            }
+        }
+        else
+        {
+            serialize_size_t size = li.size();
+            *this << size;
+            for (auto &&v : li)
+            {
+                *this << v;
             }
         }
         return *this;
