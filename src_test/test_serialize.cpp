@@ -120,3 +120,18 @@ TEST_CASE("Serialize-std-vector", "[core][serialize]")
         CHECK(v1 == v2);
     }
 }
+
+struct sbt : std::basic_streambuf<std::iostream::char_type, std::iostream::traits_type>
+{
+};
+
+TEST_CASE("Serialize-Exception", "[core][serialize]")
+{
+    sbt sb;
+    std::iostream ss(&sb);
+    Archive<Writer> ar(ss);
+    Archive<Reader> ar2(ss);
+    int i = 0;
+    CHECK_THROWS_MATCHES(ar << i, Exception, WhatEquals("Failed to write 4 bytes to output stream! Wrote 0"));
+    CHECK_THROWS_MATCHES(ar2 << i, Exception, WhatEquals("Failed to read 4 bytes from input stream! Read 0"));
+}
