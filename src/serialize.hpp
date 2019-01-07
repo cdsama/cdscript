@@ -55,12 +55,12 @@ class Archive
     template <typename T>
     typename std::enable_if<std::is_arithmetic<T>::value, Archive>::type &operator<<(T &v)
     {
-        BinaryIO(std::addressof(v), sizeof(T));
+        BinaryIO(std::addressof(const_cast<typename std::remove_cv<T>::type &>(v)), sizeof(T));
         return *this;
     }
 
-    template <class _ElemT, class _Traits, class _Alloc>
-    Archive &operator<<(std::basic_string<_ElemT, _Traits, _Alloc> &str)
+    template <class _ElemT, class _Traits, class _Allocator>
+    Archive &operator<<(std::basic_string<_ElemT, _Traits, _Allocator> &str)
     {
         if constexpr (Loading)
         {
@@ -78,8 +78,8 @@ class Archive
         return *this;
     }
 
-    template <class _ElemT, class _Alloc>
-    Archive &operator<<(std::vector<_ElemT, _Alloc> &vec)
+    template <class _ElemT, class _Allocator>
+    Archive &operator<<(std::vector<_ElemT, _Allocator> &vec)
     {
         if constexpr (Loading)
         {
@@ -168,8 +168,8 @@ class Archive
         return *this;
     }
 
-    template <class _ElemT, class _Alloc>
-    Archive &operator<<(std::list<_ElemT, _Alloc> &li)
+    template <class _ElemT, class _Allocator>
+    Archive &operator<<(std::list<_ElemT, _Allocator> &li)
     {
         if constexpr (Loading)
         {
@@ -186,6 +186,33 @@ class Archive
             serialize_size_t size = li.size();
             *this << size;
             for (auto &&v : li)
+            {
+                *this << v;
+            }
+        }
+        return *this;
+    }
+    template <class _ElemT, class _Compare, class _Allocator>
+    Archive &operator<<(std::set<_ElemT, _Compare, _Allocator> &s)
+    {
+        if constexpr (Loading)
+        {
+            serialize_size_t size;
+            *this << size;
+            s.clear();
+            auto hint = s.begin();
+            _ElemT v;
+            for (serialize_size_t i = 0; i < size; i++)
+            {
+                *this << v;
+                hint = s.emplace_hint(hint, std::move(v));
+            }
+        }
+        else
+        {
+            serialize_size_t size = s.size();
+            *this << size;
+            for (auto &&v : s)
             {
                 *this << v;
             }

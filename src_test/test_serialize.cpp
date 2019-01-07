@@ -6,6 +6,7 @@
 #include <vector>
 #include <array>
 #include <list>
+#include <set>
 #include <sstream>
 #include "catch2_ext.hpp"
 #include "serialize.hpp"
@@ -166,6 +167,20 @@ TEST_CASE("Serialize-std-list", "[core][serialize]")
         ar << v1;
         Archive<Reader> ar2(ss);
         std::list<std::string> v2;
+        ar2 << v2;
+        CHECK(v1 == v2);
+    }
+}
+
+TEST_CASE("Serialize-std-set", "[core][serialize]")
+{
+    {
+        std::set<int32_t> v1 = {1, 2, 3, 4, 5};
+        std::stringstream ss;
+        Archive<Writer> ar(ss);
+        ar << v1;
+        Archive<Reader> ar2(ss);
+        std::set<int32_t> v2;
         ar2 << v2;
         CHECK(v1 == v2);
     }
