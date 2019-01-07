@@ -78,6 +78,62 @@ class Archive
         return *this;
     }
 
+    template <class _Ty, class _Alloc>
+    Archive &operator<<([[maybe_unused]] std::vector<_Ty, _Alloc> &vec)
+    {
+        if constexpr (Loading)
+        {
+            serialize_size_t size;
+            *this << size;
+            vec.resize(static_cast<std::size_t>(size));
+            if constexpr (std::is_same<_Ty, bool>::value)
+            {
+                for (auto &&v : vec)
+                {
+                    bool b;
+                    *this << b;
+                    v = b;
+                }
+            }
+            else if constexpr (std::is_arithmetic<_Ty>::value)
+            {
+                BinaryIO(vec.data(), static_cast<std::size_t>(size) * sizeof(_Ty));
+            }
+            else
+            {
+                for (auto &&v : vec)
+                {
+                    *this << v;
+                }
+            }
+        }
+        else
+        {
+            serialize_size_t size = vec.size();
+            *this << size;
+            if constexpr (std::is_same<_Ty, bool>::value)
+            {
+                for (auto &&v : vec)
+                {
+                    bool b = static_cast<bool>(v);
+                    *this << b;
+                }
+            }
+            else if constexpr (std::is_arithmetic<_Ty>::value)
+            {
+                BinaryIO(vec.data(), size * sizeof(_Ty));
+            }
+            else
+            {
+                for (auto &&v : vec)
+                {
+                    *this << v;
+                }
+            }
+        }
+        return *this;
+    }
+
   private:
     void BinaryIO(void *const data, std::size_t size)
     {

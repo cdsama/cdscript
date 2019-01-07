@@ -1,11 +1,12 @@
 // Copyright (c) 2019 chendi
-// 
+//
 // This software is released under the MIT License.
 // https://opensource.org/licenses/MIT
 
+#include <vector>
+#include <sstream>
 #include "catch2_ext.hpp"
 #include "serialize.hpp"
-#include <sstream>
 
 using namespace cd::serialize;
 
@@ -83,5 +84,39 @@ TEST_CASE("Serialize-String", "[core][serialize]")
         Strings s2;
         ar2 << s2;
         CHECK(s1 == s2);
+    }
+}
+
+TEST_CASE("Serialize-std-vector", "[core][serialize]")
+{
+    {
+        std::vector<bool> v1 = {true, false, true, true, false};
+        std::stringstream ss;
+        Archive<Writer> ar(ss);
+        ar << v1;
+        Archive<Reader> ar2(ss);
+        std::vector<bool> v2;
+        ar2 << v2;
+        CHECK(v1 == v2);
+    }
+    {
+        std::vector<int32_t> v1 = {1, 2, 3, 4, 5};
+        std::stringstream ss;
+        Archive<Writer> ar(ss);
+        ar << v1;
+        Archive<Reader> ar2(ss);
+        std::vector<int32_t> v2;
+        ar2 << v2;
+        CHECK(v1 == v2);
+    }
+    {
+        std::vector<std::string> v1 = {"H", "E", "L", "L", "O", "world"};
+        std::stringstream ss;
+        Archive<Writer> ar(ss);
+        ar << v1;
+        Archive<Reader> ar2(ss);
+        std::vector<std::string> v2;
+        ar2 << v2;
+        CHECK(v1 == v2);
     }
 }
