@@ -1,5 +1,5 @@
 // Copyright (c) 2019 chendi
-// 
+//
 // This software is released under the MIT License.
 // https://opensource.org/licenses/MIT
 
@@ -29,8 +29,8 @@ class TestVisitor : public Visitor
     void Visit(__CLASS_NAME__ *syntax, std::any &data) override \
     {                                                           \
         (void)syntax;                                           \
-        auto types = std::any_cast<std::list<ESyntax> *>(data); \
-        types->push_back(ESyntax::__CLASS_NAME__);              \
+        auto types = std::any_cast<std::list<int> *>(data);     \
+        types->push_back((int)ESyntax::__CLASS_NAME__);         \
         __CHILDREN_VISIT__                                      \
     }
     DEFAULT_VISIT_IMPL(LiteralValue, )
@@ -44,12 +44,13 @@ TEST_CASE("Parser-LiteralValue", "[core][parser]")
         auto lexer = Lexer::GetLexer(code);
         auto parser = Parser::GetParser(lexer);
         auto ast = parser->GetAbstractSyntaxTree();
-        std::list<ESyntax> types;
+        std::list<int> types;
         std::any data = &types;
         TestVisitor visitor;
         ast->Visit(&visitor, data);
         REQUIRE_FALSE(types.empty());
-        CHECK(types.front() == ESyntax::LiteralValue);
+        std::list<int> result = {0};
+        CHECK(types == result);
     }
 }
 
@@ -60,85 +61,60 @@ TEST_CASE("Parser-Binary", "[core][parser]")
         auto lexer = Lexer::GetLexer(code);
         auto parser = Parser::GetParser(lexer);
         auto ast = parser->GetAbstractSyntaxTree();
-        std::list<ESyntax> types;
+        std::list<int> types;
         std::any data = &types;
         TestVisitor visitor;
         ast->Visit(&visitor, data);
-        auto result = {1, 1, 0, 0, 0};
-        REQUIRE(types.size() == result.size());
-        for (auto &&var : result)
-        {
-            CHECK(static_cast<int>(types.front()) == var);
-            types.pop_front();
-        }
+        std::list<int> result = {1, 1, 0, 0, 0};
+        CHECK(types == result);
     }
     {
         std::istringstream code("1 + 1 * 2");
         auto lexer = Lexer::GetLexer(code);
         auto parser = Parser::GetParser(lexer);
         auto ast = parser->GetAbstractSyntaxTree();
-        std::list<ESyntax> types;
+        std::list<int> types;
         std::any data = &types;
         TestVisitor visitor;
         ast->Visit(&visitor, data);
-        auto result = {1, 0, 1, 0, 0};
-        REQUIRE(types.size() == result.size());
-        for (auto &&var : result)
-        {
-            CHECK(static_cast<int>(types.front()) == var);
-            types.pop_front();
-        }
+        std::list<int> result = {1, 0, 1, 0, 0};
+        CHECK(types == result);
     }
     {
         std::istringstream code("1 * 1 + 2");
         auto lexer = Lexer::GetLexer(code);
         auto parser = Parser::GetParser(lexer);
         auto ast = parser->GetAbstractSyntaxTree();
-        std::list<ESyntax> types;
+        std::list<int> types;
         std::any data = &types;
         TestVisitor visitor;
         ast->Visit(&visitor, data);
-        auto result = {1, 1, 0, 0, 0};
-        REQUIRE(types.size() == result.size());
-        for (auto &&var : result)
-        {
-            CHECK(static_cast<int>(types.front()) == var);
-            types.pop_front();
-        }
+        std::list<int> result = {1, 1, 0, 0, 0};
+        CHECK(types == result);
     }
     {
         std::istringstream code("true && false || true");
         auto lexer = Lexer::GetLexer(code);
         auto parser = Parser::GetParser(lexer);
         auto ast = parser->GetAbstractSyntaxTree();
-        std::list<ESyntax> types;
+        std::list<int> types;
         std::any data = &types;
         TestVisitor visitor;
         ast->Visit(&visitor, data);
-        auto result = {1, 1, 0, 0, 0};
-        REQUIRE(types.size() == result.size());
-        for (auto &&var : result)
-        {
-            CHECK(static_cast<int>(types.front()) == var);
-            types.pop_front();
-        }
+        std::list<int> result = {1, 1, 0, 0, 0};
+        CHECK(types == result);
     }
     {
         std::istringstream code("1 * 2 / 3 % 4 << 5 >> 6 < 7 > 8 <= 9 >= 10 == 11 != 12 & 13 ^ 14 | 15 && 16 || 17");
         auto lexer = Lexer::GetLexer(code);
         auto parser = Parser::GetParser(lexer);
         auto ast = parser->GetAbstractSyntaxTree();
-        std::list<ESyntax> types;
+        std::list<int> types;
         std::any data = &types;
         TestVisitor visitor;
         ast->Visit(&visitor, data);
-        auto result = {1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
-        REQUIRE(types.size() == result.size());
-        for (auto &&var : result)
-        {
-            CHECK(static_cast<int>(types.front()) == var);
-            types.pop_front();
-        }
+        std::list<int> result = {1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+        CHECK(types == result);
     }
 }
 TEST_CASE("Parser-Comment", "[core][parser]")
