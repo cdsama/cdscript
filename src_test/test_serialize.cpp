@@ -4,6 +4,7 @@
 // https://opensource.org/licenses/MIT
 
 #include <vector>
+#include <array>
 #include <sstream>
 #include "catch2_ext.hpp"
 #include "serialize.hpp"
@@ -116,6 +117,30 @@ TEST_CASE("Serialize-std-vector", "[core][serialize]")
         ar << v1;
         Archive<Reader> ar2(ss);
         std::vector<std::string> v2;
+        ar2 << v2;
+        CHECK(v1 == v2);
+    }
+}
+
+TEST_CASE("Serialize-std-array", "[core][serialize]")
+{
+    {
+        std::array<int32_t, 5> v1 = {1, 2, 3, 4, 5};
+        std::stringstream ss;
+        Archive<Writer> ar(ss);
+        ar << v1;
+        Archive<Reader> ar2(ss);
+        std::array<int32_t, 5> v2;
+        ar2 << v2;
+        CHECK(v1 == v2);
+    }
+    {
+        std::array<std::string, 6> v1 = {"H", "E", "L", "L", "O", "world"};
+        std::stringstream ss;
+        Archive<Writer> ar(ss);
+        ar << v1;
+        Archive<Reader> ar2(ss);
+        std::array<std::string, 6> v2;
         ar2 << v2;
         CHECK(v1 == v2);
     }

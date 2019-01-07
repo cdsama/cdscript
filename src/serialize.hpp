@@ -134,6 +134,40 @@ class Archive
         return *this;
     }
 
+    template <class _Tp, std::size_t _Size>
+    Archive &operator<<([[maybe_unused]] std::array<_Tp, _Size> &arr)
+    {
+        if constexpr (Loading)
+        {
+            if constexpr (std::is_arithmetic<_Tp>::value)
+            {
+                BinaryIO(arr.data(), sizeof(arr));
+            }
+            else
+            {
+                for (auto &&v : arr)
+                {
+                    *this << v;
+                }
+            }
+        }
+        else
+        {
+            if constexpr (std::is_arithmetic<_Tp>::value)
+            {
+                BinaryIO(arr.data(), sizeof(arr));
+            }
+            else
+            {
+                for (auto &&v : arr)
+                {
+                    *this << v;
+                }
+            }
+        }
+        return *this;
+    }
+
   private:
     void BinaryIO(void *const data, std::size_t size)
     {
