@@ -7,6 +7,7 @@
 #include <array>
 #include <list>
 #include <set>
+#include <unordered_set>
 #include <map>
 #include <unordered_map>
 #include <sstream>
@@ -178,6 +179,16 @@ TEST_CASE("Serialize-std-set", "[core][serialize]")
 {
     {
         std::set<int32_t> v1 = {1, 2, 3, 4, 5};
+        std::stringstream ss;
+        Archive<Writer> ar(ss);
+        ar << v1;
+        Archive<Reader> ar2(ss);
+        decltype(v1) v2;
+        ar2 << v2;
+        CHECK(v1 == v2);
+    }
+    {
+        std::unordered_set<int32_t> v1 = {1, 2, 3, 4, 5};
         std::stringstream ss;
         Archive<Writer> ar(ss);
         ar << v1;

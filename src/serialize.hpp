@@ -227,6 +227,34 @@ class Archive
         return *this;
     }
 
+    template <class _ElemT, class _Hasher, class _Compare, class _Allocator>
+    Archive &operator<<(std::unordered_set<_ElemT, _Hasher, _Compare, _Allocator> &container)
+    {
+        if constexpr (Loading)
+        {
+            serialize_size_t size;
+            *this << size;
+            container.clear();
+            container.reserve(static_cast<std::size_t>(size));
+            _ElemT v;
+            for (serialize_size_t i = 0; i < size; ++i)
+            {
+                *this << v;
+                container.emplace(std::move(v));
+            }
+        }
+        else
+        {
+            serialize_size_t size = container.size();
+            *this << size;
+            for (auto &&v : container)
+            {
+                *this << v;
+            }
+        }
+        return *this;
+    }
+
     template <template <typename...> class _MapT, typename... _Args, typename = typename _MapT<_Args...>::mapped_type>
     Archive &operator<<(_MapT<_Args...> &container)
     {
