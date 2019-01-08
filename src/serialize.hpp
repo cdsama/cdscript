@@ -53,9 +53,16 @@ class Archive
     }
 
     template <typename T>
+    Archive &operator<<(const T &v)
+    {
+        *this << const_cast<T &>(v);
+        return *this;
+    }
+
+    template <typename T>
     typename std::enable_if<std::is_arithmetic<T>::value, Archive>::type &operator<<(T &v)
     {
-        BinaryIO(std::addressof(const_cast<typename std::remove_cv<T>::type &>(v)), sizeof(T));
+        BinaryIO(std::addressof(v), sizeof(T));
         return *this;
     }
 
@@ -79,16 +86,16 @@ class Archive
     }
 
     template <class _ElemT, class _Allocator>
-    Archive &operator<<(std::vector<_ElemT, _Allocator> &vec)
+    Archive &operator<<(std::vector<_ElemT, _Allocator> &container)
     {
         if constexpr (Loading)
         {
             serialize_size_t size;
             *this << size;
-            vec.resize(static_cast<std::size_t>(size));
+            container.resize(static_cast<std::size_t>(size));
             if constexpr (std::is_same<_ElemT, bool>::value)
             {
-                for (auto &&v : vec)
+                for (auto &&v : container)
                 {
                     bool b;
                     *this << b;
@@ -97,11 +104,11 @@ class Archive
             }
             else if constexpr (std::is_arithmetic<_ElemT>::value)
             {
-                BinaryIO(vec.data(), static_cast<std::size_t>(size) * sizeof(_ElemT));
+                BinaryIO(container.data(), static_cast<std::size_t>(size) * sizeof(_ElemT));
             }
             else
             {
-                for (auto &&v : vec)
+                for (auto &&v : container)
                 {
                     *this << v;
                 }
@@ -109,11 +116,11 @@ class Archive
         }
         else
         {
-            serialize_size_t size = vec.size();
+            serialize_size_t size = container.size();
             *this << size;
             if constexpr (std::is_same<_ElemT, bool>::value)
             {
-                for (auto &&v : vec)
+                for (auto &&v : container)
                 {
                     bool b = static_cast<bool>(v);
                     *this << b;
@@ -121,11 +128,11 @@ class Archive
             }
             else if constexpr (std::is_arithmetic<_ElemT>::value)
             {
-                BinaryIO(vec.data(), size * sizeof(_ElemT));
+                BinaryIO(container.data(), size * sizeof(_ElemT));
             }
             else
             {
-                for (auto &&v : vec)
+                for (auto &&v : container)
                 {
                     *this << v;
                 }
@@ -135,17 +142,17 @@ class Archive
     }
 
     template <class _ElemT, std::size_t _Size>
-    Archive &operator<<(std::array<_ElemT, _Size> &arr)
+    Archive &operator<<(std::array<_ElemT, _Size> &container)
     {
         if constexpr (Loading)
         {
             if constexpr (std::is_arithmetic<_ElemT>::value)
             {
-                BinaryIO(arr.data(), sizeof(arr));
+                BinaryIO(container.data(), sizeof(container));
             }
             else
             {
-                for (auto &&v : arr)
+                for (auto &&v : container)
                 {
                     *this << v;
                 }
@@ -155,11 +162,11 @@ class Archive
         {
             if constexpr (std::is_arithmetic<_ElemT>::value)
             {
-                BinaryIO(arr.data(), sizeof(arr));
+                BinaryIO(container.data(), sizeof(container));
             }
             else
             {
-                for (auto &&v : arr)
+                for (auto &&v : container)
                 {
                     *this << v;
                 }
@@ -169,23 +176,23 @@ class Archive
     }
 
     template <class _ElemT, class _Allocator>
-    Archive &operator<<(std::list<_ElemT, _Allocator> &li)
+    Archive &operator<<(std::list<_ElemT, _Allocator> &container)
     {
         if constexpr (Loading)
         {
             serialize_size_t size;
             *this << size;
-            li.resize(static_cast<std::size_t>(size));
-            for (auto &&v : li)
+            container.resize(static_cast<std::size_t>(size));
+            for (auto &&v : container)
             {
                 *this << v;
             }
         }
         else
         {
-            serialize_size_t size = li.size();
+            serialize_size_t size = container.size();
             *this << size;
-            for (auto &&v : li)
+            for (auto &&v : container)
             {
                 *this << v;
             }
@@ -193,28 +200,59 @@ class Archive
         return *this;
     }
     template <class _ElemT, class _Compare, class _Allocator>
-    Archive &operator<<(std::set<_ElemT, _Compare, _Allocator> &s)
+    Archive &operator<<(std::set<_ElemT, _Compare, _Allocator> &container)
     {
         if constexpr (Loading)
         {
             serialize_size_t size;
             *this << size;
-            s.clear();
-            auto hint = s.begin();
+            container.clear();
+            auto hint = container.begin();
             _ElemT v;
-            for (serialize_size_t i = 0; i < size; i++)
+            for (serialize_size_t i = 0; i < size; ++i)
             {
                 *this << v;
-                hint = s.emplace_hint(hint, std::move(v));
+                hint = container.emplace_hint(hint, std::move(v));
             }
         }
         else
         {
-            serialize_size_t size = s.size();
+            serialize_size_t size = container.size();
             *this << size;
-            for (auto &&v : s)
+            for (auto &&v : container)
             {
                 *this << v;
+            }
+        }
+        return *this;
+    }
+
+    template <template <typename...> class _MapT, typename... _Args, typename = typename _MapT<_Args...>::mapped_type>
+    Archive &operator<<(_MapT<_Args...> &container)
+    {
+        if constexpr (Loading)
+        {
+            serialize_size_t size;
+            *this << size;
+            container.clear();
+            auto hint = container.begin();
+            typename _MapT<_Args...>::key_type k;
+            typename _MapT<_Args...>::mapped_type v;
+            for (serialize_size_t i = 0; i < size; ++i)
+            {
+                *this << k;
+                *this << v;
+                hint = container.emplace_hint(hint, std::move(k), std::move(v));
+            }
+        }
+        else
+        {
+            serialize_size_t size = container.size();
+            *this << size;
+            for (auto &&itr : container)
+            {
+                *this << itr.first;
+                *this << itr.second;
             }
         }
         return *this;

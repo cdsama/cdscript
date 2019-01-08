@@ -7,6 +7,8 @@
 #include <array>
 #include <list>
 #include <set>
+#include <map>
+#include <unordered_map>
 #include <sstream>
 #include "catch2_ext.hpp"
 #include "serialize.hpp"
@@ -48,14 +50,14 @@ struct Types
 
 TEST_CASE("Serialize-Basic", "[core][serialize]")
 {
-    Types t1 = {false, -1, -2, -3, -4, 1, 2, 3, 4};
+    Types v1 = {false, -1, -2, -3, -4, 1, 2, 3, 4};
     std::stringstream ss;
     Archive<Writer> ar(ss);
-    ar << t1;
-    Types t2;
+    ar << v1;
+    decltype(v1) v2;
     Archive<Reader> ar2(ss);
-    ar2 << t2;
-    CHECK(t1 == t2);
+    ar2 << v2;
+    CHECK(v1 == v2);
 }
 
 struct Strings
@@ -79,14 +81,14 @@ struct Strings
 TEST_CASE("Serialize-String", "[core][serialize]")
 {
     {
-        Strings s1 = {"Hello World!", L"你好世界！", u"ハローワールド", U"전 세계 여러분 안녕하세요"};
+        Strings v1 = {"Hello World!", L"你好世界！", u"ハローワールド", U"전 세계 여러분 안녕하세요"};
         std::stringstream ss;
         Archive<Writer> ar(ss);
-        ar << s1;
+        ar << v1;
         Archive<Reader> ar2(ss);
-        Strings s2;
-        ar2 << s2;
-        CHECK(s1 == s2);
+        decltype(v1) v2;
+        ar2 << v2;
+        CHECK(v1 == v2);
     }
 }
 
@@ -98,7 +100,7 @@ TEST_CASE("Serialize-std-vector", "[core][serialize]")
         Archive<Writer> ar(ss);
         ar << v1;
         Archive<Reader> ar2(ss);
-        std::vector<bool> v2;
+        decltype(v1) v2;
         ar2 << v2;
         CHECK(v1 == v2);
     }
@@ -108,7 +110,7 @@ TEST_CASE("Serialize-std-vector", "[core][serialize]")
         Archive<Writer> ar(ss);
         ar << v1;
         Archive<Reader> ar2(ss);
-        std::vector<int32_t> v2;
+        decltype(v1) v2;
         ar2 << v2;
         CHECK(v1 == v2);
     }
@@ -118,7 +120,7 @@ TEST_CASE("Serialize-std-vector", "[core][serialize]")
         Archive<Writer> ar(ss);
         ar << v1;
         Archive<Reader> ar2(ss);
-        std::vector<std::string> v2;
+        decltype(v1) v2;
         ar2 << v2;
         CHECK(v1 == v2);
     }
@@ -132,7 +134,7 @@ TEST_CASE("Serialize-std-array", "[core][serialize]")
         Archive<Writer> ar(ss);
         ar << v1;
         Archive<Reader> ar2(ss);
-        std::array<int32_t, 5> v2;
+        decltype(v1) v2;
         ar2 << v2;
         CHECK(v1 == v2);
     }
@@ -142,7 +144,7 @@ TEST_CASE("Serialize-std-array", "[core][serialize]")
         Archive<Writer> ar(ss);
         ar << v1;
         Archive<Reader> ar2(ss);
-        std::array<std::string, 6> v2;
+        decltype(v1) v2;
         ar2 << v2;
         CHECK(v1 == v2);
     }
@@ -156,7 +158,7 @@ TEST_CASE("Serialize-std-list", "[core][serialize]")
         Archive<Writer> ar(ss);
         ar << v1;
         Archive<Reader> ar2(ss);
-        std::list<int32_t> v2;
+        decltype(v1) v2;
         ar2 << v2;
         CHECK(v1 == v2);
     }
@@ -166,7 +168,7 @@ TEST_CASE("Serialize-std-list", "[core][serialize]")
         Archive<Writer> ar(ss);
         ar << v1;
         Archive<Reader> ar2(ss);
-        std::list<std::string> v2;
+        decltype(v1) v2;
         ar2 << v2;
         CHECK(v1 == v2);
     }
@@ -180,7 +182,41 @@ TEST_CASE("Serialize-std-set", "[core][serialize]")
         Archive<Writer> ar(ss);
         ar << v1;
         Archive<Reader> ar2(ss);
-        std::set<int32_t> v2;
+        decltype(v1) v2;
+        ar2 << v2;
+        CHECK(v1 == v2);
+    }
+}
+
+TEST_CASE("Serialize-std-map", "[core][serialize]")
+{
+    {
+        std::map<std::string, int32_t> v1 = {{"Alice", 1}, {"Bob", 2}, {"Cindy", 3}, {"David", 4}, {"Ella", 5}};
+        std::stringstream ss;
+        Archive<Writer> ar(ss);
+        ar << v1;
+        Archive<Reader> ar2(ss);
+        decltype(v1) v2;
+        ar2 << v2;
+        CHECK(v1 == v2);
+    }
+    {
+        std::unordered_map<std::string, int32_t> v1 = {{"Alice", 1}, {"Bob", 2}, {"Cindy", 3}, {"David", 4}, {"Ella", 5}};
+        std::stringstream ss;
+        Archive<Writer> ar(ss);
+        ar << v1;
+        Archive<Reader> ar2(ss);
+        decltype(v1) v2;
+        ar2 << v2;
+        CHECK(v1 == v2);
+    }
+    {
+        std::unordered_multimap<std::string, int32_t> v1 = {{"Alice", 1}, {"Bob", 2}, {"Bob", 2}, {"Cindy", 3}, {"David", 4}, {"Ella", 5}};
+        std::stringstream ss;
+        Archive<Writer> ar(ss);
+        ar << v1;
+        Archive<Reader> ar2(ss);
+        decltype(v1) v2;
         ar2 << v2;
         CHECK(v1 == v2);
     }
