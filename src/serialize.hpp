@@ -311,6 +311,22 @@ class Archive
         return *this;
     }
 
+    template <class _ElemT, class _Container>
+    struct StackContainerHelper : public std::stack<_ElemT, _Container>
+    {
+        _Container &GetContainer()
+        {
+            return this->c;
+        }
+    };
+
+    template <class _ElemT, class _Container>
+    Archive &operator<<(std::stack<_ElemT, _Container> &container)
+    {
+        *this << reinterpret_cast<StackContainerHelper<_ElemT, _Container> *>(&container)->GetContainer();
+        return *this;
+    }
+
   private:
     void BinaryIO(void *const data, std::size_t size)
     {

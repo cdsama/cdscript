@@ -11,6 +11,7 @@
 #include <map>
 #include <unordered_map>
 #include <deque>
+#include <stack>
 #include <sstream>
 #include "catch2_ext.hpp"
 #include "serialize.hpp"
@@ -238,6 +239,25 @@ TEST_CASE("Serialize-std-deque", "[core][serialize]")
 {
     {
         std::deque<int32_t> v1 = {1, 2, 3, 4, 5};
+        std::stringstream ss;
+        Archive<Writer> ar(ss);
+        ar << v1;
+        Archive<Reader> ar2(ss);
+        decltype(v1) v2;
+        ar2 << v2;
+        CHECK(v1 == v2);
+    }
+}
+
+TEST_CASE("Serialize-std-stack", "[core][serialize]")
+{
+    {
+        std::stack<int32_t> v1;
+        auto data = {1, 2, 3, 4, 5};
+        for (auto &&i : data)
+        {
+            v1.push(i);
+        }
         std::stringstream ss;
         Archive<Writer> ar(ss);
         ar << v1;
