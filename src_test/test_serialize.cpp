@@ -10,6 +10,7 @@
 #include <unordered_set>
 #include <map>
 #include <unordered_map>
+#include <deque>
 #include <sstream>
 #include "catch2_ext.hpp"
 #include "serialize.hpp"
@@ -223,6 +224,20 @@ TEST_CASE("Serialize-std-map", "[core][serialize]")
     }
     {
         std::unordered_multimap<std::string, int32_t> v1 = {{"Alice", 1}, {"Bob", 2}, {"Bob", 2}, {"Cindy", 3}, {"David", 4}, {"Ella", 5}};
+        std::stringstream ss;
+        Archive<Writer> ar(ss);
+        ar << v1;
+        Archive<Reader> ar2(ss);
+        decltype(v1) v2;
+        ar2 << v2;
+        CHECK(v1 == v2);
+    }
+}
+
+TEST_CASE("Serialize-std-deque", "[core][serialize]")
+{
+    {
+        std::deque<int32_t> v1 = {1, 2, 3, 4, 5};
         std::stringstream ss;
         Archive<Writer> ar(ss);
         ar << v1;

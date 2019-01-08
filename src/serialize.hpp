@@ -255,6 +255,31 @@ class Archive
         return *this;
     }
 
+    template <class _ElemT, class _Allocator>
+    Archive &operator<<(std::deque<_ElemT, _Allocator> &container)
+    {
+        if constexpr (Loading)
+        {
+            serialize_size_t size;
+            *this << size;
+            container.resize(static_cast<std::size_t>(size));
+            for (auto &&v : container)
+            {
+                *this << v;
+            }
+        }
+        else
+        {
+            serialize_size_t size = container.size();
+            *this << size;
+            for (auto &&v : container)
+            {
+                *this << v;
+            }
+        }
+        return *this;
+    }
+
     template <template <typename...> class _MapT, typename... _Args, typename = typename _MapT<_Args...>::mapped_type>
     Archive &operator<<(_MapT<_Args...> &container)
     {
