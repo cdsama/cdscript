@@ -93,13 +93,8 @@ class Archive
     template <typename T>
     Archive &operator<<(const T &v)
     {
+        static_assert(!std::is_pointer<T>::value, "serializer does not support serializing raw pointers, should use a smart pointer");
         *this << const_cast<T &>(v);
-        return *this;
-    }
-    template <typename T>
-    Archive &operator<<(T *&v)
-    {
-        static_assert(false, "serializer does not support serializing raw pointers - should use a smart pointer");
         return *this;
     }
 
