@@ -38,6 +38,44 @@ struct Traits<Writer>
 
 using serialize_size_t = std::uint64_t;
 
+template <typename T>
+class Constructor
+{
+    T *t = nullptr;
+
+  public:
+    ~Constructor()
+    {
+        if (t != nullptr)
+        {
+            delete t;
+        }
+    }
+
+    template <typename... Args>
+    void operator()(Args... args)
+    {
+        if (t != nullptr)
+        {
+            delete t;
+        }
+        t = new T(args...);
+    }
+
+    std::unique_ptr<T> get_unique()
+    {
+        std::unique_ptr<T> res(t);
+        t = nullptr;
+        return res;
+    }
+    std::shared_ptr<T> get_shared()
+    {
+        std::shared_ptr<T> res(t);
+        t = nullptr;
+        return res;
+    }
+};
+
 template <EArchiveType ArchiveType>
 class Archive
 {
@@ -56,6 +94,12 @@ class Archive
     Archive &operator<<(const T &v)
     {
         *this << const_cast<T &>(v);
+        return *this;
+    }
+    template <typename T>
+    Archive &operator<<(T *&v)
+    {
+        static_assert(false, "serializer does not support serializing raw pointers - should use a smart pointer");
         return *this;
     }
 

@@ -282,3 +282,56 @@ TEST_CASE("Serialize-Exception", "[core][serialize]")
     CHECK_THROWS_MATCHES(ar << i, Exception, WhatEquals("Failed to write 4 bytes to output stream! Wrote 0"));
     CHECK_THROWS_MATCHES(ar2 << i, Exception, WhatEquals("Failed to read 4 bytes from input stream! Read 0"));
 }
+
+class NoDefaultConstructor
+{
+    int i;
+
+  public:
+    NoDefaultConstructor(int _i)
+        : i(_i)
+    {
+    }
+    int GetI()
+    {
+        return i;
+    }
+
+    template <typename Archive>
+    friend Archive &operator<<(Archive &ar, NoDefaultConstructor &s)
+    {
+        ar << s.i;
+        return ar;
+    }
+    template <typename Archive>
+    friend Archive &operator<<(Archive &ar, Constructor<NoDefaultConstructor> &constructor)
+    {
+        int i;
+        ar << i;
+        constructor(i);
+        return ar;
+    }
+};
+
+TEST_CASE("Serialize-NoDefaultConstructor", "[core][serialize]")
+{
+    {
+        std::stringstream ss;
+        Archive<Writer> ar(ss);
+        NoDefaultConstructor v1 = {5};
+        ar << v1;
+        ar << v1;
+        ar << v1;
+        ar << v1;
+        Archive<Reader> ar2(ss);
+        Constructor<NoDefaultConstructor> v2;
+        ar2 << v2;
+        CHECK(v1.GetI() == v2.get_unique()->GetI());
+        ar2 << v2;
+        CHECK(v1.GetI() == v2.get_shared()->GetI());
+        ar2 << v2;
+        ar2 << v2;
+        // decltype(v1) *v4;
+        // ar2 << v4; // compile error
+    }
+}
