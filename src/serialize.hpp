@@ -62,9 +62,10 @@ class Constructor
         t = new T(args...);
     }
 
-    std::unique_ptr<T> get_unique()
+    template<typename D = std::default_delete<T>>
+    std::unique_ptr<T,D> get_unique(D&& d=std::default_delete<T>())
     {
-        std::unique_ptr<T> res(t);
+        std::unique_ptr<T, D> res(t, d);
         t = nullptr;
         return res;
     }
