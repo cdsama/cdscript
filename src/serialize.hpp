@@ -123,21 +123,21 @@ class RTTI
 
 #define REGIST_TYPE(__TYPE_NAME__) REGIST_TYPE_WITH_ALIAS_NAME(__TYPE_NAME__, __TYPE_NAME__)
 
-#define REGIST_TYPE_WITH_ALIAS_NAME(__TYPE_NAME__, __ALIAS_NAME__) \
-    template <>                                                    \
-    struct TypeName<__TYPE_NAME__>                                 \
-    {                                                              \
-        constexpr static const char *name = #__ALIAS_NAME__;       \
-    };                                                             \
-    struct RegClass##__TYPE_NAME__##__ALIAS_NAME__                 \
-    {                                                              \
-        RegClass##__TYPE_NAME__##__ALIAS_NAME__()                  \
-        {                                                          \
-            TypeSerializerRegister<__TYPE_NAME__>::BindName();     \
-            TypeSerializerRegister<__TYPE_NAME__>::BindSaver();    \
-            TypeSerializerRegister<__TYPE_NAME__>::BindLoader();   \
-        }                                                          \
-    };                                                             \
+#define REGIST_TYPE_WITH_ALIAS_NAME(__TYPE_NAME__, __ALIAS_NAME__)              \
+    template <>                                                                 \
+    struct cd::serialize::TypeName<__TYPE_NAME__>                               \
+    {                                                                           \
+        constexpr static const char *name = #__ALIAS_NAME__;                    \
+    };                                                                          \
+    struct RegClass##__TYPE_NAME__##__ALIAS_NAME__                              \
+    {                                                                           \
+        RegClass##__TYPE_NAME__##__ALIAS_NAME__()                               \
+        {                                                                       \
+            cd::serialize::TypeSerializerRegister<__TYPE_NAME__>::BindName();   \
+            cd::serialize::TypeSerializerRegister<__TYPE_NAME__>::BindSaver();  \
+            cd::serialize::TypeSerializerRegister<__TYPE_NAME__>::BindLoader(); \
+        }                                                                       \
+    };                                                                          \
     RegClass##__TYPE_NAME__##__ALIAS_NAME__ Ins##__TYPE_NAME__##__ALIAS_NAME__
 
 template <EArchiveType ArchiveType>
