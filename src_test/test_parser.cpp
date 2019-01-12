@@ -14,7 +14,9 @@
 #include "parser.hpp"
 #include "visitor.hpp"
 
-using namespace cd::script;
+using namespace cd;
+using namespace script;
+
 
 enum class ESyntax
 {

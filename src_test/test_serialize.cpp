@@ -16,7 +16,8 @@
 #include "catch2_ext.hpp"
 #include "serialize.hpp"
 
-using namespace cd::serialize;
+using namespace cd;
+using namespace serialize;
 
 struct Types
 {
@@ -58,8 +59,8 @@ TEST_CASE("Serialize-Basic", "[core][serialize]")
     Archive<Writer> ar(ss);
     ar << v1;
     decltype(v1) v2;
-    Archive<Reader> ar2(ss);
-    ar2 << v2;
+    Archive<Reader> arr(ss);
+    arr << v2;
     CHECK(v1 == v2);
 }
 
@@ -88,9 +89,9 @@ TEST_CASE("Serialize-String", "[core][serialize]")
         std::stringstream ss;
         Archive<Writer> ar(ss);
         ar << v1;
-        Archive<Reader> ar2(ss);
+        Archive<Reader> arr(ss);
         decltype(v1) v2;
-        ar2 << v2;
+        arr << v2;
         CHECK(v1 == v2);
     }
 }
@@ -102,9 +103,9 @@ TEST_CASE("Serialize-std-vector", "[core][serialize]")
         std::stringstream ss;
         Archive<Writer> ar(ss);
         ar << v1;
-        Archive<Reader> ar2(ss);
+        Archive<Reader> arr(ss);
         decltype(v1) v2;
-        ar2 << v2;
+        arr << v2;
         CHECK(v1 == v2);
     }
     {
@@ -112,9 +113,9 @@ TEST_CASE("Serialize-std-vector", "[core][serialize]")
         std::stringstream ss;
         Archive<Writer> ar(ss);
         ar << v1;
-        Archive<Reader> ar2(ss);
+        Archive<Reader> arr(ss);
         decltype(v1) v2;
-        ar2 << v2;
+        arr << v2;
         CHECK(v1 == v2);
     }
     {
@@ -122,9 +123,9 @@ TEST_CASE("Serialize-std-vector", "[core][serialize]")
         std::stringstream ss;
         Archive<Writer> ar(ss);
         ar << v1;
-        Archive<Reader> ar2(ss);
+        Archive<Reader> arr(ss);
         decltype(v1) v2;
-        ar2 << v2;
+        arr << v2;
         CHECK(v1 == v2);
     }
 }
@@ -136,9 +137,9 @@ TEST_CASE("Serialize-std-array", "[core][serialize]")
         std::stringstream ss;
         Archive<Writer> ar(ss);
         ar << v1;
-        Archive<Reader> ar2(ss);
+        Archive<Reader> arr(ss);
         decltype(v1) v2;
-        ar2 << v2;
+        arr << v2;
         CHECK(v1 == v2);
     }
     {
@@ -146,9 +147,9 @@ TEST_CASE("Serialize-std-array", "[core][serialize]")
         std::stringstream ss;
         Archive<Writer> ar(ss);
         ar << v1;
-        Archive<Reader> ar2(ss);
+        Archive<Reader> arr(ss);
         decltype(v1) v2;
-        ar2 << v2;
+        arr << v2;
         CHECK(v1 == v2);
     }
 }
@@ -160,9 +161,9 @@ TEST_CASE("Serialize-std-list", "[core][serialize]")
         std::stringstream ss;
         Archive<Writer> ar(ss);
         ar << v1;
-        Archive<Reader> ar2(ss);
+        Archive<Reader> arr(ss);
         decltype(v1) v2;
-        ar2 << v2;
+        arr << v2;
         CHECK(v1 == v2);
     }
     {
@@ -170,9 +171,9 @@ TEST_CASE("Serialize-std-list", "[core][serialize]")
         std::stringstream ss;
         Archive<Writer> ar(ss);
         ar << v1;
-        Archive<Reader> ar2(ss);
+        Archive<Reader> arr(ss);
         decltype(v1) v2;
-        ar2 << v2;
+        arr << v2;
         CHECK(v1 == v2);
     }
 }
@@ -184,9 +185,19 @@ TEST_CASE("Serialize-std-set", "[core][serialize]")
         std::stringstream ss;
         Archive<Writer> ar(ss);
         ar << v1;
-        Archive<Reader> ar2(ss);
+        Archive<Reader> arr(ss);
         decltype(v1) v2;
-        ar2 << v2;
+        arr << v2;
+        CHECK(v1 == v2);
+    }
+    {
+        std::set<std::string> v1 = {"A", "B", "C", "D", "E"};
+        std::stringstream ss;
+        Archive<Writer> ar(ss);
+        ar << v1;
+        Archive<Reader> arr(ss);
+        decltype(v1) v2;
+        arr << v2;
         CHECK(v1 == v2);
     }
     {
@@ -194,9 +205,19 @@ TEST_CASE("Serialize-std-set", "[core][serialize]")
         std::stringstream ss;
         Archive<Writer> ar(ss);
         ar << v1;
-        Archive<Reader> ar2(ss);
+        Archive<Reader> arr(ss);
         decltype(v1) v2;
-        ar2 << v2;
+        arr << v2;
+        CHECK(v1 == v2);
+    }
+    {
+        std::unordered_set<std::string> v1 = {"A", "B", "C", "D", "E"};
+        std::stringstream ss;
+        Archive<Writer> ar(ss);
+        ar << v1;
+        Archive<Reader> arr(ss);
+        decltype(v1) v2;
+        arr << v2;
         CHECK(v1 == v2);
     }
 }
@@ -208,9 +229,9 @@ TEST_CASE("Serialize-std-map", "[core][serialize]")
         std::stringstream ss;
         Archive<Writer> ar(ss);
         ar << v1;
-        Archive<Reader> ar2(ss);
+        Archive<Reader> arr(ss);
         decltype(v1) v2;
-        ar2 << v2;
+        arr << v2;
         CHECK(v1 == v2);
     }
     {
@@ -218,9 +239,9 @@ TEST_CASE("Serialize-std-map", "[core][serialize]")
         std::stringstream ss;
         Archive<Writer> ar(ss);
         ar << v1;
-        Archive<Reader> ar2(ss);
+        Archive<Reader> arr(ss);
         decltype(v1) v2;
-        ar2 << v2;
+        arr << v2;
         CHECK(v1 == v2);
     }
     {
@@ -228,9 +249,9 @@ TEST_CASE("Serialize-std-map", "[core][serialize]")
         std::stringstream ss;
         Archive<Writer> ar(ss);
         ar << v1;
-        Archive<Reader> ar2(ss);
+        Archive<Reader> arr(ss);
         decltype(v1) v2;
-        ar2 << v2;
+        arr << v2;
         CHECK(v1 == v2);
     }
 }
@@ -242,9 +263,9 @@ TEST_CASE("Serialize-std-deque", "[core][serialize]")
         std::stringstream ss;
         Archive<Writer> ar(ss);
         ar << v1;
-        Archive<Reader> ar2(ss);
+        Archive<Reader> arr(ss);
         decltype(v1) v2;
-        ar2 << v2;
+        arr << v2;
         CHECK(v1 == v2);
     }
 }
@@ -261,9 +282,9 @@ TEST_CASE("Serialize-std-stack", "[core][serialize]")
         std::stringstream ss;
         Archive<Writer> ar(ss);
         ar << v1;
-        Archive<Reader> ar2(ss);
+        Archive<Reader> arr(ss);
         decltype(v1) v2;
-        ar2 << v2;
+        arr << v2;
         CHECK(v1 == v2);
     }
 }
@@ -277,10 +298,10 @@ TEST_CASE("Serialize-Exception", "[core][serialize]")
     sbt sb;
     std::iostream ss(&sb);
     Archive<Writer> ar(ss);
-    Archive<Reader> ar2(ss);
+    Archive<Reader> arr(ss);
     int i = 0;
     CHECK_THROWS_MATCHES(ar << i, Exception, WhatEquals("Failed to write 4 bytes to output stream! Wrote 0"));
-    CHECK_THROWS_MATCHES(ar2 << i, Exception, WhatEquals("Failed to read 4 bytes from input stream! Read 0"));
+    CHECK_THROWS_MATCHES(arr << i, Exception, WhatEquals("Failed to read 4 bytes from input stream! Read 0"));
 }
 
 class NoDefaultConstructor
@@ -292,6 +313,7 @@ class NoDefaultConstructor
         : i(_i)
     {
     }
+    int j = 0;
     int GetI()
     {
         return i;
@@ -300,7 +322,7 @@ class NoDefaultConstructor
     template <typename Archive>
     friend Archive &operator<<(Archive &ar, NoDefaultConstructor &s)
     {
-        ar << s.i;
+        ar << s.i << s.j;
         return ar;
     }
     template <typename Archive>
@@ -309,6 +331,7 @@ class NoDefaultConstructor
         int i;
         ar << i;
         constructor(i);
+        ar << constructor->j;
         return ar;
     }
 };
@@ -319,19 +342,201 @@ TEST_CASE("Serialize-NoDefaultConstructor", "[core][serialize]")
         std::stringstream ss;
         Archive<Writer> ar(ss);
         NoDefaultConstructor v1 = {5};
+        v1.j = 3;
         ar << v1;
         ar << v1;
         ar << v1;
         ar << v1;
-        Archive<Reader> ar2(ss);
+        Archive<Reader> arr(ss);
         Constructor<NoDefaultConstructor> v2;
-        ar2 << v2;
+        arr << v2;
         CHECK(v1.GetI() == v2.get_unique()->GetI());
-        ar2 << v2;
-        CHECK(v1.GetI() == v2.get_shared()->GetI());
-        ar2 << v2;
-        ar2 << v2;
+        arr << v2;
+        CHECK(v1.j == v2.get_shared()->j);
+        arr << v2;
+        arr << v2;
         // decltype(v1) *v4;
-        // ar2 << v4; // compile error
+        // arr << v4; // compile error
+    }
+}
+
+struct A
+{
+    int a = 0;
+    virtual ~A() {}
+    virtual std::string Type()
+    {
+        return "A";
+    }
+    template <typename Archive>
+    friend Archive &operator<<(Archive &ar, A &v)
+    {
+        ar << v.a;
+        return ar;
+    }
+};
+
+struct B : A
+{
+    int b = 0;
+    virtual std::string Type()
+    {
+        return "B";
+    }
+    template <typename Archive>
+    friend Archive &operator<<(Archive &ar, B &v)
+    {
+        ar << v.a << v.b;
+        return ar;
+    }
+};
+
+struct C : A
+{
+    int c = 0;
+    C(int i)
+    {
+        c = i;
+    }
+    virtual std::string Type()
+    {
+        return "C";
+    }
+    template <typename Archive>
+    friend Archive &operator<<(Archive &ar, C &v)
+    {
+        ar << v.a << v.c;
+        return ar;
+    }
+    template <typename Archive>
+    friend Archive &operator<<(Archive &ar, Constructor<C> &constructor)
+    {
+        int c;
+        int a;
+        ar << a << c;
+        constructor(c);
+        constructor->a = a;
+        return ar;
+    }
+};
+
+struct D : B
+{
+    int d = 0;
+    virtual std::string Type()
+    {
+        return "D";
+    }
+    template <typename Archive>
+    friend Archive &operator<<(Archive &ar, D &v)
+    {
+        ar << v.a << v.b << v.d;
+        return ar;
+    }
+};
+
+REGIST_TYPE(A);
+REGIST_TYPE(B);
+REGIST_TYPE(C);
+REGIST_TYPE(D);
+
+struct E
+{
+    int e = 0;
+    template <typename Archive>
+    friend Archive &operator<<(Archive &ar, E &v)
+    {
+        ar << v.e;
+        return ar;
+    }
+};
+
+struct F
+{
+    int f = 0;
+    F(int i)
+    {
+        f = i;
+    }
+    template <typename Archive>
+    friend Archive &operator<<(Archive &ar, F &v)
+    {
+        ar << v.f;
+        return ar;
+    }
+    template <typename Archive>
+    friend Archive &operator<<(Archive &ar, Constructor<F> &constructor)
+    {
+        int f;
+        ar << f;
+        constructor(f);
+        return ar;
+    }
+};
+
+TEST_CASE("Serialize-polymorphic", "[core][serialize]")
+{
+    {
+        std::unique_ptr<A> a = std::make_unique<A>();
+        std::unique_ptr<A> b = std::make_unique<B>();
+        std::unique_ptr<A> c = std::make_unique<C>(3);
+        std::unique_ptr<A> d = std::make_unique<D>();
+        std::unique_ptr<A> e;
+        std::stringstream ss;
+        Archive<Writer> ar(ss);
+        ar << a;
+        ar << b;
+        ar << c;
+        ar << d;
+        ar << e;
+        Archive<Reader> arr(ss);
+        std::unique_ptr<A> aa;
+        std::unique_ptr<A> bb;
+        std::unique_ptr<A> cc;
+        std::unique_ptr<A> dd;
+        std::unique_ptr<A> ee;
+        arr << aa;
+        arr << bb;
+        arr << cc;
+        arr << dd;
+        arr << ee;
+        REQUIRE(aa != nullptr);
+        CHECK(aa->Type() == "A");
+        REQUIRE(bb != nullptr);
+        CHECK(bb->Type() == "B");
+        REQUIRE(cc != nullptr);
+        CHECK(cc->Type() == "C");
+        CHECK(static_cast<C *>(c.get())->c == static_cast<C *>(cc.get())->c);
+        REQUIRE(dd != nullptr);
+        CHECK(dd->Type() == "D");
+        CHECK(ee == nullptr);
+    }
+    {
+        std::unique_ptr<E> e = std::make_unique<E>();
+        e->e = 3;
+        std::unique_ptr<E> f;
+        std::stringstream ss;
+        Archive<Writer> ar(ss);
+        ar << e;
+        ar << f;
+        Archive<Reader> arr(ss);
+        std::unique_ptr<E> ee;
+        std::unique_ptr<E> ff;
+        arr << ee;
+        arr << ff;
+        REQUIRE(ee != nullptr);
+        CHECK(e->e == ee->e);
+        CHECK(ff == nullptr);
+    }
+    {
+        std::unique_ptr<F> f = std::make_unique<F>(3);
+        std::stringstream ss;
+        Archive<Writer> ar(ss);
+        ar << f;
+        Archive<Reader> arr(ss);
+        std::unique_ptr<F> ff;
+        arr << ff;
+        REQUIRE(ff != nullptr);
+        CHECK(f->f == ff->f);
     }
 }

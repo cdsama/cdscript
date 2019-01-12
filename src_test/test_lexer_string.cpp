@@ -10,7 +10,9 @@
 #include <limits>
 #include <iostream>
 
-using namespace cd::script;
+using namespace cd;
+using namespace script;
+
 
 TEST_CASE("Lexer-String", "[core][lexer][string]")
 {

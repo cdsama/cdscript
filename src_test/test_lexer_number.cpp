@@ -5,7 +5,9 @@
 
 #include "catch2_ext.hpp"
 #include "lexer.hpp"
-using namespace cd::script;
+using namespace cd;
+using namespace script;
+
 
 template <typename T>
 Token MockNumberToken(T t)

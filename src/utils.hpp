@@ -7,8 +7,6 @@
 #include <sstream>
 namespace cd
 {
-namespace exception
-{
 class Exception : public std::exception
 {
   public:
@@ -26,5 +24,4 @@ class Exception : public std::exception
     }
     std::string ss;
 };
-} // namespace exception
 } // namespace cd

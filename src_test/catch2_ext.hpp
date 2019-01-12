@@ -6,7 +6,6 @@
 #pragma once
 #include <catch2/catch.hpp>
 #include "utils.hpp"
-using namespace cd::exception;
 class WhatEquals : public Catch::MatcherBase<std::exception>
 {
     std::string what;

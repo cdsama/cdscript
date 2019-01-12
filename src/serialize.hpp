@@ -6,6 +6,8 @@
 #pragma once
 #include <iostream>
 #include <cstdint>
+#include <typeindex>
+#include <unordered_map>
 #include "utils.hpp"
 namespace cd
 {
@@ -62,8 +64,18 @@ class Constructor
         t = new T(args...);
     }
 
-    template<typename D = std::default_delete<T>>
-    std::unique_ptr<T,D> get_unique(D&& d=std::default_delete<T>())
+    T *operator->()
+    {
+        return t;
+    }
+
+    T &operator*()
+    {
+        return *t;
+    }
+
+    template <typename D = std::default_delete<T>>
+    std::unique_ptr<T, D> get_unique(D &&d = std::default_delete<T>())
     {
         std::unique_ptr<T, D> res(t, d);
         t = nullptr;
@@ -76,6 +88,57 @@ class Constructor
         return res;
     }
 };
+
+class RTTI
+{
+    RTTI() {}
+    RTTI(RTTI const &) = delete;
+    RTTI operator=(RTTI const &) = delete;
+
+  public:
+    std::unordered_map<std::type_index, std::string> NameMap;
+    std::unordered_map<std::type_index, std::function<void(void *, void *)>> SaverMap;
+    std::unordered_map<std::string, std::function<void(void *, void *)>> LoaderMap;
+
+    static RTTI &Instance()
+    {
+        static RTTI ins;
+        return ins;
+    }
+
+    template <typename Archive>
+    void Save(Archive *ar, const std::type_index &index, void *v)
+    {
+        auto itr = SaverMap.find(index);
+        *ar << NameMap[index];
+        itr->second(ar, v);
+    }
+    template <typename Archive>
+    void Load(Archive *ar, const std::string &type, void *v)
+    {
+        auto itr = LoaderMap.find(type);
+        itr->second(ar, v);
+    }
+};
+
+#define REGIST_TYPE(__TYPE_NAME__) REGIST_TYPE_WITH_ALIAS_NAME(__TYPE_NAME__, __TYPE_NAME__)
+
+#define REGIST_TYPE_WITH_ALIAS_NAME(__TYPE_NAME__, __ALIAS_NAME__) \
+    template <>                                                    \
+    struct TypeName<__TYPE_NAME__>                                 \
+    {                                                              \
+        constexpr static const char *name = #__ALIAS_NAME__;       \
+    };                                                             \
+    struct RegClass##__TYPE_NAME__##__ALIAS_NAME__                 \
+    {                                                              \
+        RegClass##__TYPE_NAME__##__ALIAS_NAME__()                  \
+        {                                                          \
+            TypeSerializerRegister<__TYPE_NAME__>::BindName();     \
+            TypeSerializerRegister<__TYPE_NAME__>::BindSaver();    \
+            TypeSerializerRegister<__TYPE_NAME__>::BindLoader();   \
+        }                                                          \
+    };                                                             \
+    RegClass##__TYPE_NAME__##__ALIAS_NAME__ Ins##__TYPE_NAME__##__ALIAS_NAME__
 
 template <EArchiveType ArchiveType>
 class Archive
@@ -91,13 +154,13 @@ class Archive
     {
     }
 
-    template <typename T>
-    Archive &operator<<(const T &v)
-    {
-        static_assert(!std::is_pointer<T>::value, "serializer does not support serializing raw pointers, should use a smart pointer");
-        *this << const_cast<T &>(v);
-        return *this;
-    }
+    // template <typename T>
+    // Archive &operator<<(const T &v)
+    // {
+    //     static_assert(!std::is_pointer<T>::value, "serializer does not support serializing raw pointers, should use a smart pointer");
+    //     *this << const_cast<T &>(v);
+    //     return *this;
+    // }
 
     template <typename T>
     typename std::enable_if<std::is_arithmetic<T>::value, Archive>::type &operator<<(T &v)
@@ -106,7 +169,14 @@ class Archive
         return *this;
     }
 
-    template <class _ElemT, class _Traits, class _Allocator>
+    template <typename T>
+    typename std::enable_if<std::is_pointer<T>::value, Archive>::type &operator<<(T &)
+    {
+        static_assert(!std::is_pointer<T>::value, "serializer does not support serializing raw pointers, should use a smart pointer");
+        return *this;
+    }
+
+    template <typename _ElemT, typename _Traits, typename _Allocator>
     Archive &operator<<(std::basic_string<_ElemT, _Traits, _Allocator> &str)
     {
         if constexpr (Loading)
@@ -114,7 +184,7 @@ class Archive
             serialize_size_t size;
             *this << size;
             str.resize(static_cast<std::size_t>(size));
-            BinaryIO(const_cast<_ElemT *>(str.data()), static_cast<std::size_t>(size) * sizeof(_ElemT));
+            BinaryIO(str.data(), static_cast<std::size_t>(size) * sizeof(_ElemT));
         }
         else
         {
@@ -125,7 +195,7 @@ class Archive
         return *this;
     }
 
-    template <class _ElemT, class _Allocator>
+    template <typename _ElemT, typename _Allocator>
     Archive &operator<<(std::vector<_ElemT, _Allocator> &container)
     {
         if constexpr (Loading)
@@ -181,7 +251,7 @@ class Archive
         return *this;
     }
 
-    template <class _ElemT, std::size_t _Size>
+    template <typename _ElemT, std::size_t _Size>
     Archive &operator<<(std::array<_ElemT, _Size> &container)
     {
         if constexpr (Loading)
@@ -215,7 +285,7 @@ class Archive
         return *this;
     }
 
-    template <class _ElemT, class _Allocator>
+    template <typename _ElemT, typename _Allocator>
     Archive &operator<<(std::list<_ElemT, _Allocator> &container)
     {
         if constexpr (Loading)
@@ -239,7 +309,7 @@ class Archive
         }
         return *this;
     }
-    template <class _ElemT, class _Compare, class _Allocator>
+    template <typename _ElemT, typename _Compare, typename _Allocator>
     Archive &operator<<(std::set<_ElemT, _Compare, _Allocator> &container)
     {
         if constexpr (Loading)
@@ -261,13 +331,13 @@ class Archive
             *this << size;
             for (auto &&v : container)
             {
-                *this << v;
+                *this << const_cast<_ElemT &>(v);
             }
         }
         return *this;
     }
 
-    template <class _ElemT, class _Hasher, class _Compare, class _Allocator>
+    template <typename _ElemT, typename _Hasher, typename _Compare, typename _Allocator>
     Archive &operator<<(std::unordered_set<_ElemT, _Hasher, _Compare, _Allocator> &container)
     {
         if constexpr (Loading)
@@ -289,13 +359,13 @@ class Archive
             *this << size;
             for (auto &&v : container)
             {
-                *this << v;
+                *this << const_cast<_ElemT &>(v);
             }
         }
         return *this;
     }
 
-    template <class _ElemT, class _Allocator>
+    template <typename _ElemT, typename _Allocator>
     Archive &operator<<(std::deque<_ElemT, _Allocator> &container)
     {
         if constexpr (Loading)
@@ -320,7 +390,7 @@ class Archive
         return *this;
     }
 
-    template <template <typename...> class _MapT, typename... _Args, typename = typename _MapT<_Args...>::mapped_type>
+    template <template <typename...> typename _MapT, typename... _Args, typename = typename _MapT<_Args...>::mapped_type>
     Archive &operator<<(_MapT<_Args...> &container)
     {
         if constexpr (Loading)
@@ -344,14 +414,14 @@ class Archive
             *this << size;
             for (auto &&itr : container)
             {
-                *this << itr.first;
+                *this << const_cast<typename _MapT<_Args...>::key_type &>(itr.first);
                 *this << itr.second;
             }
         }
         return *this;
     }
 
-    template <class _ElemT, class _Container>
+    template <typename _ElemT, typename _Container>
     struct StackContainerHelper : public std::stack<_ElemT, _Container>
     {
         _Container &GetContainer()
@@ -360,20 +430,73 @@ class Archive
         }
     };
 
-    template <class _ElemT, class _Container>
+    template <typename _ElemT, typename _Container>
     Archive &operator<<(std::stack<_ElemT, _Container> &container)
     {
         *this << reinterpret_cast<StackContainerHelper<_ElemT, _Container> *>(&container)->GetContainer();
         return *this;
     }
 
+    template <typename T, typename Deleter>
+    Archive &operator<<(std::unique_ptr<T, Deleter> &ptr)
+    {
+        if (Loading)
+        {
+            ptr.reset();
+            bool valid;
+            *this << valid;
+            if (valid)
+            {
+                Constructor<T> constructor;
+                if constexpr (std::is_polymorphic<T>::value)
+                {
+                    std::string TypeNameString;
+                    *this << TypeNameString;
+                    RTTI::Instance().Load(this, TypeNameString, &constructor);
+                    ptr = constructor.get_unique();
+                }
+                else
+                {
+                    if constexpr (std::is_default_constructible<T>::value)
+                    {
+                        constructor();
+                        ptr = constructor.get_unique();
+                        *this << *ptr.get();
+                    }
+                    else
+                    {
+                        *this << constructor;
+                        ptr = constructor.get_unique();
+                    }
+                }
+            }
+        }
+        else
+        {
+            bool valid = (ptr.get() != nullptr);
+            *this << valid;
+            if (valid)
+            {
+                if constexpr (std::is_polymorphic<T>::value)
+                {
+                    const auto &RealType = std::type_index(typeid(*(ptr.get())));
+                    RTTI::Instance().Save(this, RealType, ptr.get());
+                }
+                else
+                {
+                    *this << *ptr.get();
+                }
+            }
+        }
+        return *this;
+    }
+
   private:
-    void BinaryIO(void *const data, std::size_t size)
+    void BinaryIO(const void *data, std::size_t size)
     {
         if constexpr (Loading)
         {
-            auto const readSize = static_cast<std::size_t>(stream.rdbuf()->sgetn(reinterpret_cast<char *>(data), size));
-
+            auto const readSize = static_cast<std::size_t>(stream.rdbuf()->sgetn(reinterpret_cast<char *>(const_cast<void *>(data)), size));
             if (readSize != size)
             {
                 throw Exception("Failed to read ", size, " bytes from input stream! Read ", readSize);
@@ -387,6 +510,50 @@ class Archive
                 throw Exception("Failed to write ", size, " bytes to output stream! Wrote ", writtenSize);
             }
         }
+    }
+};
+
+template <typename T>
+struct TypeName
+{
+};
+
+template <typename T>
+struct TypeSerializerRegister
+{
+    static void BindName()
+    {
+        auto &NameMap = ::cd::serialize::RTTI::Instance().NameMap;
+        auto TypeIndex = std::type_index(typeid(T));
+        NameMap[TypeIndex] = TypeName<T>::name;
+    }
+
+    static void BindSaver()
+    {
+        auto &SaverMap = ::cd::serialize::RTTI::Instance().SaverMap;
+        auto TypeIndex = std::type_index(typeid(T));
+        SaverMap[TypeIndex] = [](void *ar, void *ptr) {
+            Archive<Writer> *arT = static_cast<Archive<Writer> *>(ar);
+            T *ptrT = static_cast<T *>(ptr);
+            *arT << *ptrT;
+        };
+    }
+    static void BindLoader()
+    {
+        auto &LoaderMap = ::cd::serialize::RTTI::Instance().LoaderMap;
+        LoaderMap[TypeName<T>::name] = [](void *ar, void *ptr) {
+            Archive<Reader> *arT = static_cast<Archive<Reader> *>(ar);
+            Constructor<T> &constructor = (*(static_cast<Constructor<T> *>(ptr)));
+            if constexpr (std::is_default_constructible<T>::value)
+            {
+                constructor();
+                *arT << *constructor;
+            }
+            else
+            {
+                *arT << constructor;
+            }
+        };
     }
 };
 

@@ -6,7 +6,8 @@
 #include "catch2_ext.hpp"
 #include "lexer.hpp"
 #include <unordered_map>
-using namespace cd::script;
+using namespace cd;
+using namespace script;
 TEST_CASE("Lexer-SingleToken", "[core][lexer][simple]")
 {
 

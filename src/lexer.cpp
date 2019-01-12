@@ -11,7 +11,7 @@
 #include "lexer.hpp"
 #include "utils.hpp"
 
-using cd::exception::Exception;
+
 
 namespace cd::script
 {
