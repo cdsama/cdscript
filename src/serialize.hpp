@@ -41,36 +41,20 @@ struct Traits<Writer>
 using serialize_size_t = std::uint64_t;
 
 template <typename T>
-void DeleteIfNotNull(T *&t)
-{
-    if (t != nullptr)
-    {
-        delete t;
-    }
-    t = nullptr;
-}
-
-template <typename T>
 class Constructor
 {
-    T *t = nullptr;
+    std::unique_ptr<T> t;
 
   public:
-    ~Constructor()
-    {
-        DeleteIfNotNull(t);
-    }
-
     template <typename... Args>
     void operator()(Args... args)
     {
-        DeleteIfNotNull(t);
-        t = new T(args...);
+        t = std::make_unique<T>(args...);
     }
 
     T *operator->()
     {
-        return t;
+        return t.get();
     }
 
     T &operator*()
@@ -81,14 +65,12 @@ class Constructor
     template <typename D = std::default_delete<T>>
     std::unique_ptr<T, D> get_unique(D &&d = std::default_delete<T>())
     {
-        std::unique_ptr<T, D> res(t, d);
-        t = nullptr;
+        std::unique_ptr<T, D> res(t.release(), d);
         return res;
     }
     std::shared_ptr<T> get_shared()
     {
-        std::shared_ptr<T> res(t);
-        t = nullptr;
+        std::shared_ptr<T> res(t.release());
         return res;
     }
 };
@@ -157,14 +139,6 @@ class Archive
         : stream(_stream)
     {
     }
-
-    // template <typename T>
-    // Archive &operator<<(const T &v)
-    // {
-    //     static_assert(!std::is_pointer<T>::value, "serializer does not support serializing raw pointers, should use a smart pointer");
-    //     *this << const_cast<T &>(v);
-    //     return *this;
-    // }
 
     template <typename T>
     typename std::enable_if<std::is_arithmetic<T>::value, Archive>::type &operator<<(T &v)
