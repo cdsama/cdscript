@@ -495,6 +495,22 @@ struct TypeName
 };
 
 template <typename T>
+static void LoaderFunction(void *ar, void *ptr)
+{
+    Archive<Reader> *arT = static_cast<Archive<Reader> *>(ar);
+    Constructor<T> &constructor = (*(static_cast<Constructor<T> *>(ptr)));
+    if constexpr (std::is_default_constructible<T>::value || std::is_trivially_default_constructible<T>::value)
+    {
+        constructor();
+        *arT << *constructor;
+    }
+    else
+    {
+        *arT << constructor;
+    }
+}
+
+template <typename T>
 struct TypeSerializerRegister
 {
     static void BindName()
@@ -513,22 +529,6 @@ struct TypeSerializerRegister
             T *ptrT = static_cast<T *>(ptr);
             *arT << *ptrT;
         };
-    }
-
-    template <typename T>
-    static void LoaderFunction(void *ar, void *ptr)
-    {
-        Archive<Reader> *arT = static_cast<Archive<Reader> *>(ar);
-        Constructor<T> &constructor = (*(static_cast<Constructor<T> *>(ptr)));
-        if constexpr (std::is_default_constructible<T>::value || std::is_trivially_default_constructible<T>::value)
-        {
-            constructor();
-            *arT << *constructor;
-        }
-        else
-        {
-            *arT << constructor;
-        }
     }
 
     static void BindLoader()
