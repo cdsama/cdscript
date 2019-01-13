@@ -41,6 +41,16 @@ struct Traits<Writer>
 using serialize_size_t = std::uint64_t;
 
 template <typename T>
+void DeleteIfNotNull(T *&t)
+{
+    if (t != nullptr)
+    {
+        delete t;
+    }
+    t = nullptr;
+}
+
+template <typename T>
 class Constructor
 {
     T *t = nullptr;
@@ -48,19 +58,13 @@ class Constructor
   public:
     ~Constructor()
     {
-        if (t != nullptr)
-        {
-            delete t;
-        }
+        DeleteIfNotNull(t);
     }
 
     template <typename... Args>
     void operator()(Args... args)
     {
-        if (t != nullptr)
-        {
-            delete t;
-        }
+        DeleteIfNotNull(t);
         t = new T(args...);
     }
 
