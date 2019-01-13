@@ -499,7 +499,7 @@ static void LoaderFunction(void *ar, void *ptr)
 {
     Archive<Reader> *arT = static_cast<Archive<Reader> *>(ar);
     Constructor<T> &constructor = (*(static_cast<Constructor<T> *>(ptr)));
-    if constexpr (std::is_default_constructible<T>::value || std::is_trivially_default_constructible<T>::value)
+    if constexpr (std::is_default_constructible<T>::value)
     {
         constructor();
         *arT << *constructor;
