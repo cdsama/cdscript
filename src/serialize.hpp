@@ -514,21 +514,28 @@ struct TypeSerializerRegister
             *arT << *ptrT;
         };
     }
+
+    template <typename T>
+    static void LoaderFunction(void *ar, void *ptr)
+    {
+        Archive<Reader> *arT = static_cast<Archive<Reader> *>(ar);
+        Constructor<T> &constructor = (*(static_cast<Constructor<T> *>(ptr)));
+        if constexpr (std::is_default_constructible<T>::value || std::is_trivially_default_constructible<T>::value)
+        {
+            constructor();
+            *arT << *constructor;
+        }
+        else
+        {
+            *arT << constructor;
+        }
+    }
+
     static void BindLoader()
     {
         auto &LoaderMap = ::cd::serialize::RTTI::Instance().LoaderMap;
         LoaderMap[TypeName<T>::name] = [](void *ar, void *ptr) {
-            Archive<Reader> *arT = static_cast<Archive<Reader> *>(ar);
-            Constructor<T> &constructor = (*(static_cast<Constructor<T> *>(ptr)));
-            if constexpr (std::is_default_constructible<T>::value)
-            {
-                constructor();
-                *arT << *constructor;
-            }
-            else
-            {
-                *arT << constructor;
-            }
+            LoaderFunction<T>(ar, ptr);
         };
     }
 };
