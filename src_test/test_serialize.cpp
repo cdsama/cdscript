@@ -339,6 +339,13 @@ class NoDefaultConstructor
 TEST_CASE("Serialize-NoDefaultConstructor", "[core][serialize]")
 {
     {
+        Constructor<int32_t> c;
+        c(1);
+        c(2);
+        c(3);
+        CHECK(*c == 3);
+    }
+    {
         std::stringstream ss;
         Archive<Writer> ar(ss);
         NoDefaultConstructor v1 = {5};
