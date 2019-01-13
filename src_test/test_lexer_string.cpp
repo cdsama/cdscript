@@ -1,18 +1,16 @@
 // Copyright (c) 2019 chendi
-// 
+//
 // This software is released under the MIT License.
 // https://opensource.org/licenses/MIT
 
-#include "catch2_ext.hpp"
-
-#include "lexer.hpp"
-#include <sstream>
-#include <limits>
 #include <iostream>
+#include <limits>
+#include <sstream>
+#include "catch2_ext.hpp"
+#include "lexer.hpp"
 
 using namespace cd;
 using namespace script;
-
 
 TEST_CASE("Lexer-String", "[core][lexer][string]")
 {

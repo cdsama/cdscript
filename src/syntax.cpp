@@ -14,4 +14,4 @@ namespace cd::script
 IMPL_VISIT_FUNC(BinaryExpression)
 IMPL_VISIT_FUNC(LiteralValue)
 
-} // namespace cd::script
+}  // namespace cd::script

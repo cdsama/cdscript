@@ -4,9 +4,9 @@
 // https://opensource.org/licenses/MIT
 
 #pragma once
-#include "token.hpp"
 #include <memory>
 #include <sstream>
+#include "token.hpp"
 
 namespace cd::script
 {
@@ -41,4 +41,4 @@ class Lexer
     [[nodiscard]] static std::unique_ptr<Lexer> GetLexer(std::istream &code);
 };
 
-} // namespace cd::script
+}  // namespace cd::script

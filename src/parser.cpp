@@ -3,16 +3,14 @@
 // This software is released under the MIT License.
 // https://opensource.org/licenses/MIT
 
+#include "parser.hpp"
 #include <cassert>
-
 #include "lexer.hpp"
 #include "syntax.hpp"
-#include "parser.hpp"
 #include "utils.hpp"
 
 namespace cd::script
 {
-
 class ParserImpl : public Parser
 {
   private:
@@ -190,4 +188,4 @@ std::unique_ptr<Parser> Parser::GetParser(std::unique_ptr<Lexer> &lexer)
 {
     return std::make_unique<ParserImpl>(lexer);
 }
-} // namespace cd::script
+}  // namespace cd::script

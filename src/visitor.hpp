@@ -8,7 +8,6 @@
 
 namespace cd::script
 {
-
 class Visitor
 {
   public:
@@ -17,4 +16,4 @@ class Visitor
     virtual void Visit(LiteralValue *syntax, std::any &data) = 0;
 };
 
-} // namespace cd::script
+}  // namespace cd::script

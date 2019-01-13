@@ -4,9 +4,8 @@
 // https://opensource.org/licenses/MIT
 
 #define CATCH_CONFIG_MAIN
-#include "catch2_ext.hpp"
-
 #include <cerrno>
+#include "catch2_ext.hpp"
 
 TEST_CASE("std", "[test]")
 {

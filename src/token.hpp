@@ -6,8 +6,8 @@
 #pragma once
 #include <any>
 #include <limits>
-#include <string>
 #include <map>
+#include <string>
 #include "cdscript.hpp"
 namespace cd::script
 {
@@ -179,4 +179,4 @@ struct Token
     }
 };
 
-} // namespace cd::script
+}  // namespace cd::script

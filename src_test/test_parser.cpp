@@ -3,20 +3,18 @@
 // This software is released under the MIT License.
 // https://opensource.org/licenses/MIT
 
-#include "catch2_ext.hpp"
-
-#include <sstream>
-#include <limits>
-#include <iostream>
 #include <any>
+#include <iostream>
+#include <limits>
 #include <list>
+#include <sstream>
+#include "catch2_ext.hpp"
 #include "lexer.hpp"
 #include "parser.hpp"
 #include "visitor.hpp"
 
 using namespace cd;
 using namespace script;
-
 
 enum class ESyntax
 {

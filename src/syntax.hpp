@@ -4,8 +4,8 @@
 // https://opensource.org/licenses/MIT
 
 #pragma once
-#include <memory>
 #include <any>
+#include <memory>
 #include "token.hpp"
 
 namespace cd::script
@@ -45,4 +45,4 @@ class LiteralValue : public Syntax
     DECL_VISIT_FUNC();
 };
 
-} // namespace cd::script
+}  // namespace cd::script

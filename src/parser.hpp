@@ -17,4 +17,4 @@ class Parser
     [[nodiscard]] virtual std::unique_ptr<class Syntax> GetAbstractSyntaxTree() = 0;
     [[nodiscard]] static std::unique_ptr<Parser> GetParser(std::unique_ptr<class Lexer> &lexer);
 };
-} // namespace cd::script
+}  // namespace cd::script

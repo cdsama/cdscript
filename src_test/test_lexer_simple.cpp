@@ -1,16 +1,15 @@
 // Copyright (c) 2019 chendi
-// 
+//
 // This software is released under the MIT License.
 // https://opensource.org/licenses/MIT
 
+#include <unordered_map>
 #include "catch2_ext.hpp"
 #include "lexer.hpp"
-#include <unordered_map>
 using namespace cd;
 using namespace script;
 TEST_CASE("Lexer-SingleToken", "[core][lexer][simple]")
 {
-
     std::istringstream code("+ - * / % & | ^ ! =");
     auto lexer = Lexer::GetLexer(code);
     CHECK(lexer->GetToken().type == '+');
@@ -27,7 +26,6 @@ TEST_CASE("Lexer-SingleToken", "[core][lexer][simple]")
 
 TEST_CASE("Lexer-PureSingleToken", "[core][lexer][simple]")
 {
-
     std::istringstream code("?:;,@#()[]{}");
     auto lexer = Lexer::GetLexer(code);
     CHECK(lexer->GetToken().type == '?');
@@ -46,7 +44,6 @@ TEST_CASE("Lexer-PureSingleToken", "[core][lexer][simple]")
 
 TEST_CASE("Lexer-dot", "[core][lexer][simple]")
 {
-
     std::istringstream code(". .. ...");
     auto lexer = Lexer::GetLexer(code);
     CHECK(lexer->GetToken().type == '.');

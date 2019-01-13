@@ -3,16 +3,16 @@
 // This software is released under the MIT License.
 // https://opensource.org/licenses/MIT
 
-#include <vector>
 #include <array>
-#include <list>
-#include <set>
-#include <unordered_set>
-#include <map>
-#include <unordered_map>
 #include <deque>
-#include <stack>
+#include <list>
+#include <map>
+#include <set>
 #include <sstream>
+#include <stack>
+#include <unordered_map>
+#include <unordered_set>
+#include <vector>
 #include "catch2_ext.hpp"
 #include "serialize.hpp"
 

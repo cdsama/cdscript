@@ -1,0 +1,16 @@
+BasedOnStyle: Google
+IndentWidth: 4
+SortIncludes: true
+IncludeBlocks: Merge
+SortUsingDeclarations: true
+KeepEmptyLinesAtTheStartOfBlocks: false
+MaxEmptyLinesToKeep: 1
+FixNamespaceComments: true
+UseTab: Never
+BreakBeforeBraces: Allman
+AllowShortIfStatementsOnASingleLine: false
+IndentCaseLabels: false
+ColumnLimit: 0
+AccessModifierOffset: -2
+Cpp11BracedListStyle: true
+Standard: Cpp11

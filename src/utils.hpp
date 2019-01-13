@@ -24,4 +24,4 @@ class Exception : public std::exception
     }
     std::string ss;
 };
-} // namespace cd
+}  // namespace cd

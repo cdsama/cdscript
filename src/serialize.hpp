@@ -4,14 +4,12 @@
 // https://opensource.org/licenses/MIT
 
 #pragma once
-#include <iostream>
 #include <cstdint>
+#include <iostream>
 #include <typeindex>
 #include <unordered_map>
 #include "utils.hpp"
-namespace cd
-{
-namespace serialize
+namespace cd::serialize
 {
 enum EArchiveType
 {
@@ -535,5 +533,4 @@ struct TypeSerializerRegister
     }
 };
 
-} // namespace serialize
-} // namespace cd
+}  // namespace cd::serialize
