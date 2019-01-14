@@ -24,9 +24,9 @@ install:
 script:
   - mkdir build
   - cd build
-  - cmake ..
-  - cmake --build ./
-  - ./unittest
+  - cmake -D ENABLE_COVERAGE:BOOL=TRUE -D CMAKE_BUILD_TYPE:STRING=Debug ..
+  - cmake --build ./ -j 8
+  - ctest
   - cd ..
 
 cache:
