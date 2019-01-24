@@ -45,9 +45,9 @@ class Constructor
 
   public:
     template <typename... Args>
-    void operator()(Args... args)
+    void operator()(Args &&... args)
     {
-        t = std::make_unique<T>(args...);
+        t = std::make_unique<T>(std::forward<Args>(args)...);
     }
 
     T *operator->()
