@@ -119,7 +119,7 @@ struct Token
     {
         enum
         {
-            value = (std::numeric_limits<T>::digits << 2) + (std::numeric_limits<T>::is_integer << 1) + std::numeric_limits<T>::is_signed,
+            value = (sizeof(T) << 2) + (std::numeric_limits<T>::is_signed << 1) + std::numeric_limits<T>::is_integer,
         };
 
         static T get(std::any &number, int32_t real)
@@ -139,7 +139,7 @@ struct Token
         NumberType<__typename__>::value, SupportedNumberType<__typename__>::name \
     }
 
-    inline static std::map<int32_t, const char *> NumberTypeMap = {
+    inline static std::map<int8_t, const char *> NumberTypeMap = {
         REGIST_NUMBER_TYPE_NAME(int8_t),
         REGIST_NUMBER_TYPE_NAME(int16_t),
         REGIST_NUMBER_TYPE_NAME(int32_t),
