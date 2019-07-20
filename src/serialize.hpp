@@ -416,7 +416,7 @@ class Archive
     template <typename T, typename Deleter>
     Archive &operator<<(std::unique_ptr<T, Deleter> &ptr)
     {
-        if (Loading)
+        if constexpr (Loading)
         {
             ptr.reset();
             bool valid;
