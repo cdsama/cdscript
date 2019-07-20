@@ -11,31 +11,6 @@
 #include "cdscript.hpp"
 namespace cd::script
 {
-template <typename T>
-struct SupportedNumberType
-{
-    static constexpr bool value = false;
-};
-
-#define SupportNumberType(__TYPE_NAME__)                    \
-    template <>                                             \
-    struct SupportedNumberType<__TYPE_NAME__>               \
-    {                                                       \
-        static constexpr bool value = true;                 \
-        static constexpr const char *name = #__TYPE_NAME__; \
-    }
-
-SupportNumberType(int8_t);
-SupportNumberType(int16_t);
-SupportNumberType(int32_t);
-SupportNumberType(int64_t);
-SupportNumberType(uint8_t);
-SupportNumberType(uint16_t);
-SupportNumberType(uint32_t);
-SupportNumberType(uint64_t);
-SupportNumberType(float);
-SupportNumberType(double);
-
 using token_t = int32_t;
 struct Token
 {
@@ -90,6 +65,31 @@ struct Token
         EndOfFile,
     };
 
+    template <typename T>
+    struct SupportedNumberType
+    {
+        static constexpr bool value = false;
+    };
+
+#define SupportNumberType(__TYPE_NAME__)                    \
+    template <>                                             \
+    struct SupportedNumberType<__TYPE_NAME__>               \
+    {                                                       \
+        static constexpr bool value = true;                 \
+        static constexpr const char *name = #__TYPE_NAME__; \
+    }
+
+    SupportNumberType(int8_t);
+    SupportNumberType(int16_t);
+    SupportNumberType(int32_t);
+    SupportNumberType(int64_t);
+    SupportNumberType(uint8_t);
+    SupportNumberType(uint16_t);
+    SupportNumberType(uint32_t);
+    SupportNumberType(uint64_t);
+    SupportNumberType(float);
+    SupportNumberType(double);
+
     template <typename T, typename Enable = void>
     struct NumberType
     {
@@ -114,31 +114,35 @@ struct Token
         std::string ss;
     };
 
+    template <typename Td, typename Ts>
+    static inline Td data_cast(const Ts& v)
+    {
+        return *reinterpret_cast<const Td *>(&v);
+    }
+
     using type_value_t = uint8_t;
+    using number_data_t = int64_t;
 
     template <typename T>
     struct NumberType<T, typename std::enable_if<SupportedNumberType<T>::value>::type>
     {
-        enum
-        {
-            value = (sizeof(T) << 2) + (std::numeric_limits<T>::is_signed << 1) + std::numeric_limits<T>::is_integer,
-        };
+        static constexpr type_value_t value = (sizeof(T) << 2) + (std::numeric_limits<T>::is_signed << 1) + std::numeric_limits<T>::is_integer;
 
-        static T get(std::any &number, type_value_t real)
+        static T get(const number_data_t &number, type_value_t real)
         {
-            try
+            if (NumberType<T>::value == real)
             {
-                return std::any_cast<T>(number);
+                return data_cast<T>(number);
             }
-            catch (std::bad_any_cast &)
+            else
             {
-                throw NumberTypeError(SupportedNumberType<T>::name, NumberTypeMap[real]);
+                throw NumberTypeError(NumberTypeMap[NumberType<T>::value], NumberTypeMap[real]);
             }
         }
     };
 #define REGIST_NUMBER_TYPE_NAME(__typename__)                                    \
     {                                                                            \
-        static_cast<type_value_t>(NumberType<__typename__>::value), SupportedNumberType<__typename__>::name \
+        NumberType<__typename__>::value, SupportedNumberType<__typename__>::name \
     }
 
     inline static std::map<type_value_t, const char *> NumberTypeMap = {
@@ -157,11 +161,18 @@ struct Token
     struct NumberValue
     {
         type_value_t type;
-        std::any number;
+        number_data_t number;
         template <typename T>
         T as()
         {
             return NumberType<T>::get(number, type);
+        }
+
+        template <typename T>
+        void set(const T& v)
+        {
+            type = NumberType<T>::value;
+            number = data_cast<number_data_t>(v);
         }
     };
 

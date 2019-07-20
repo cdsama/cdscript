@@ -16,8 +16,7 @@ Token MockNumberToken(T t)
     token.line = 0;
     token.column = 0;
     Token::NumberValue value;
-    value.number = t;
-    value.type = Token::NumberType<T>::value;
+    value.set(t);
     token.value = value;
     return token;
 }

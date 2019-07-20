@@ -1058,8 +1058,7 @@ class LexerImpl : public Lexer
     {
         Token token = NormalToken(Token::Number);
         Token::NumberValue value;
-        value.number = t;
-        value.type = Token::NumberType<T>::value;
+        value.set(t);
         token.value = value;
         return token;
     }
