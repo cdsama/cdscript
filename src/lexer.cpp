@@ -1057,7 +1057,7 @@ class LexerImpl : public Lexer
     Token NumberToken(T t)
     {
         Token token = NormalToken(Token::Number);
-        Token::NumberValue value;
+        NumberValue value;
         value.set(t);
         token.value = value;
         return token;
