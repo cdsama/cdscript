@@ -114,6 +114,8 @@ struct Token
         std::string ss;
     };
 
+    using type_value_t = uint8_t;
+
     template <typename T>
     struct NumberType<T, typename std::enable_if<SupportedNumberType<T>::value>::type>
     {
@@ -122,7 +124,7 @@ struct Token
             value = (sizeof(T) << 2) + (std::numeric_limits<T>::is_signed << 1) + std::numeric_limits<T>::is_integer,
         };
 
-        static T get(std::any &number, int32_t real)
+        static T get(std::any &number, type_value_t real)
         {
             try
             {
@@ -136,10 +138,10 @@ struct Token
     };
 #define REGIST_NUMBER_TYPE_NAME(__typename__)                                    \
     {                                                                            \
-        NumberType<__typename__>::value, SupportedNumberType<__typename__>::name \
+        static_cast<type_value_t>(NumberType<__typename__>::value), SupportedNumberType<__typename__>::name \
     }
 
-    inline static std::map<int8_t, const char *> NumberTypeMap = {
+    inline static std::map<type_value_t, const char *> NumberTypeMap = {
         REGIST_NUMBER_TYPE_NAME(int8_t),
         REGIST_NUMBER_TYPE_NAME(int16_t),
         REGIST_NUMBER_TYPE_NAME(int32_t),
@@ -154,7 +156,7 @@ struct Token
 
     struct NumberValue
     {
-        int32_t type;
+        type_value_t type;
         std::any number;
         template <typename T>
         T as()
