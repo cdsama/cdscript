@@ -111,6 +111,35 @@ struct NumberValue
         }
     }
 
+#define CAST_TO_TYPE_CASE_RETURN(__TYPE__) case NumberType<__TYPE__>::value: \
+                return static_cast<T>(data_cast<__TYPE__>(number))
+
+    template <typename T>
+    T cast_to()
+    {
+        if (NumberType<T>::value == type)
+        {
+            return data_cast<T>(number);
+        }
+        else
+        {
+            switch (type)
+            {
+                CAST_TO_TYPE_CASE_RETURN(int8_t);
+                CAST_TO_TYPE_CASE_RETURN(int16_t);
+                CAST_TO_TYPE_CASE_RETURN(int32_t);
+                CAST_TO_TYPE_CASE_RETURN(uint8_t);
+                CAST_TO_TYPE_CASE_RETURN(uint16_t);
+                CAST_TO_TYPE_CASE_RETURN(uint32_t);
+                CAST_TO_TYPE_CASE_RETURN(uint64_t);
+                CAST_TO_TYPE_CASE_RETURN(float);
+                CAST_TO_TYPE_CASE_RETURN(double);
+            default:
+                return static_cast<T>(number);
+            }
+        }
+    }
+
     bool is_integer()
     {
         return type & 1;
