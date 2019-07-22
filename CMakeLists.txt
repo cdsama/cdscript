@@ -36,7 +36,19 @@ src/lexer.cpp
 src/syntax.cpp
 src/parser.cpp
 )
-aux_source_directory(src_test TEST_SOURCE_LIST)
+set(TEST_SOURCE_LIST
+src_test/catch2_ext.hpp
+src_test/test_lexer_comment.cpp
+src_test/test_lexer_identifier.cpp
+src_test/test_lexer_newline.cpp
+src_test/test_lexer_number.cpp
+src_test/test_lexer_simple.cpp
+src_test/test_lexer_string.cpp
+src_test/test_parser.cpp
+src_test/test_serialize.cpp
+src_test/test_token_number.cpp
+src_test/test.cpp
+)
 add_executable(unittest ${TEST_SOURCE_LIST})
 target_include_directories(unittest PRIVATE src)
 target_link_libraries(unittest PRIVATE Catch2::Catch2 PRIVATE cdscript)
