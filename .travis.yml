@@ -1,19 +1,19 @@
 dist: xenial
 language: cpp
 compiler:
-  - g++-8
+  - g++-9
 addons:
   apt:
     sources:
     - ubuntu-toolchain-r-test
     packages:
-    - g++-8
+    - g++-9
     - cmake
 
 before_install:
-  - export CC=gcc-8
-  - export CXX=g++-8
-  - export GCOV=gcov-8
+  - export CC=gcc-9
+  - export CXX=g++-9
+  - export GCOV=gcov-9
   - bash ./build_scripts/build_vcpkg.sh
   - export VCPKG_ROOT="$(pwd -P)/vcpkg"
   - export PATH="${PATH}:${VCPKG_ROOT}"
