@@ -6,37 +6,86 @@ options {
 
 chunk: block EOF;
 
-block: statement*;
+block: compound_statement | statement_sequence;
+
+compound_statement: '{' statement_sequence? '}';
+
+statement_sequence: statement | statement_sequence statement;
 
 statement:
-	literal ';'
-	| declarevariable ';'
-	| assignmentexpression ';';
+	';'
+	| expression ';'
+	| declare_variable ';'
+	| assignment ';'
+	| Return expression ';'
+	| compound_statement;
 
-declarevariable: varModifier varType (',' varType)*;
+declare_variable: var_modifier var_type (',' var_type)*;
 
-varModifier: Var | Global;
+var_modifier: Var | Global;
 
-constModifier: Const | Static;
+const_modifier: Const | Static;
 
-varType: Identifier (':' typeIdentifier)?;
+var_type: Identifier (':' type_identifier)?;
 
-typeIdentifier:
+type_identifier:
 	Identifier
 	| ArrarIdentifier
 	| templateIdentifier;
 
-literal: Null | booleanliteral | numberliteral;
+literal: Null | booleanliteral | numberliteral | Stringliteral;
+
+Stringliteral: '"' Schar* '"';
+
+fragment Schar:
+	~ ["\\\r\n]
+	| Escapesequence
+	| Universalcharactername;
+
+fragment Rawstring: '"' .*? '(' .*? ')' .*? '"';
+
+fragment Escapesequence:
+	Simpleescapesequence
+	| Octalescapesequence
+	| Hexadecimalescapesequence;
+
+fragment Simpleescapesequence:
+	'\\\''
+	| '\\"'
+	| '\\?'
+	| '\\\\'
+	| '\\a'
+	| '\\b'
+	| '\\f'
+	| '\\n'
+	| '\\r'
+	| '\\t'
+	| '\\v';
+
+fragment Octalescapesequence:
+	'\\' OCTAL_DIGIT
+	| '\\' OCTAL_DIGIT OCTAL_DIGIT
+	| '\\' OCTAL_DIGIT OCTAL_DIGIT OCTAL_DIGIT;
+
+fragment Hexadecimalescapesequence: '\\x' HEXADECIMAL_DIGIT+;
+fragment Hexquad:
+	HEXADECIMAL_DIGIT HEXADECIMAL_DIGIT HEXADECIMAL_DIGIT HEXADECIMAL_DIGIT;
+
+fragment Universalcharactername:
+	'\\u' Hexquad
+	| '\\U' Hexquad Hexquad;
 
 booleanliteral: True | False;
 numberliteral: IntegerLiteral | FloatingLiteral;
 
-assignmentexpression:
+assignment:
 	Identifier '=' expression
-	| declarevariable '=' expression
-	| constModifier varType '=' expression;
+	| declare_variable '=' expression
+	| const_modifier var_type '=' expression;
 
-expression: literal;
+expression: literal | Identifier | unary_operator expression;
+
+unary_operator: '!';
 
 IntegerLiteral:
 	DecimalLiteral
@@ -44,17 +93,15 @@ IntegerLiteral:
 	| HexadecimalLiteral
 	| BinaryLiteral;
 
-fragment DecimalLiteral: NONZERO_DIGIT ('\''? DIGIT)*;
+DecimalLiteral: NONZERO_DIGIT ('\''? DIGIT)*;
 
-fragment OctalLiteral: '0' ('\''? OCTAL_DIGIT)*;
+OctalLiteral: '0' ('\''? OCTAL_DIGIT)*;
 
-fragment HexadecimalLiteral: ('0x' | '0X') HEXADECIMAL_DIGIT (
+HexadecimalLiteral: ('0x' | '0X') HEXADECIMAL_DIGIT (
 		'\''? HEXADECIMAL_DIGIT
 	)*;
 
-fragment BinaryLiteral: ('0b' | '0B') BINARY_DIGIT (
-		'\''? BINARY_DIGIT
-	)*;
+BinaryLiteral: ('0b' | '0B') BINARY_DIGIT ( '\''? BINARY_DIGIT)*;
 
 FloatingLiteral:
 	DecimalFloatingLiteral
@@ -102,16 +149,18 @@ Global: 'global';
 Const: 'const';
 Property: 'property';
 Static: 'static';
+Return: 'return';
 
 /* key words ↑ */
 
-Identifier: IdentifierNON_DIGIT (IdentifierNON_DIGIT | DIGIT)*;
+Identifier:
+	IDENTIFIER_NON_DIGIT (IDENTIFIER_NON_DIGIT | DIGIT)*;
 
 ArrarIdentifier: Identifier '[]';
 templateIdentifier: Identifier '<' templateparameterlist '>';
 templateparameterlist: Identifier (',' Identifier)*;
 
-fragment IdentifierNON_DIGIT: NON_DIGIT | CHINESE_DIGIT;
+fragment IDENTIFIER_NON_DIGIT: NON_DIGIT | CHINESE_DIGIT;
 
 SemiColon: ';';
 Comma: ',';
