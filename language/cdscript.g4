@@ -10,7 +10,7 @@ block: compound_statement | statement_sequence;
 
 compound_statement: '{' statement_sequence? '}';
 
-statement_sequence: statement | statement_sequence statement;
+statement_sequence: statement+;
 
 statement:
 	';'
@@ -83,9 +83,25 @@ assignment:
 	| declare_variable '=' expression
 	| const_modifier var_type '=' expression;
 
-expression: literal | Identifier | unary_operator expression;
+expression:
+	primary_expression
+	| unary_expression
+	| expression multiplicative_operator expression
+	| expression additive_operator expression
+	| expression compare_operator expression;
 
-unary_operator: '!';
+primary_expression:
+	literal
+	| This
+	| Super
+	| Identifier
+	| '(' expression ')';
+
+unary_expression: Not expression | '#' expression;
+
+multiplicative_operator: '*' | '/' | '%';
+additive_operator: | '+' | '-';
+compare_operator: '==' | '<' | '>' | '<=' | '>=' | '!=';
 
 IntegerLiteral:
 	DecimalLiteral
@@ -148,8 +164,11 @@ Var: 'var';
 Global: 'global';
 Const: 'const';
 Property: 'property';
+This: 'this';
+Super: 'super';
 Static: 'static';
 Return: 'return';
+Not: 'not' | '!';
 
 /* key words ↑ */
 
@@ -168,6 +187,24 @@ Colon: ':';
 Less: '<';
 Greater: '>';
 Assign: '=';
+LeftBrace: '{';
+RightBrace: '}';
+LeftParen: '(';
+RightParen: ')';
+LeftBracket: '[';
+RightBracket: ']';
+Dot: '.';
+Plus: '+';
+Minus: '-';
+Star: '*';
+Div: '/';
+Mod: '%';
+Caret: '^';
+And: '&';
+Or: '|';
+Sharp: '#';
+Equal: '==';
+NotEqual: '!=';
 
 Whitespace: [ \t]+ -> channel(HIDDEN);
 Newline: ('\r' '\n'? | '\n') -> channel(HIDDEN);
