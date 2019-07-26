@@ -85,7 +85,7 @@ assignment:
 
 expression:
 	primary_expression
-	| unary_expression
+	| unary_operator expression
 	| expression multiplicative_operator expression
 	| expression additive_operator expression
 	| expression compare_operator expression;
@@ -94,13 +94,14 @@ primary_expression:
 	literal
 	| This
 	| Super
-	| Identifier
-	| '(' expression ')';
+	| value;
 
-unary_expression: Not expression | '#' expression;
+value: (Identifier | '(' expression ')' value_suffix) value_suffix*;
+value_suffix: '.' Identifier;
 
+unary_operator: Not | Sharp | PlusPlus | MinusMinus;
 multiplicative_operator: '*' | '/' | '%';
-additive_operator: | '+' | '-';
+additive_operator: '+' | '-';
 compare_operator: '==' | '<' | '>' | '<=' | '>=' | '!=';
 
 IntegerLiteral:
@@ -205,6 +206,8 @@ Or: '|';
 Sharp: '#';
 Equal: '==';
 NotEqual: '!=';
+PlusPlus: '++';
+MinusMinus: '--';
 
 Whitespace: [ \t]+ -> channel(HIDDEN);
 Newline: ('\r' '\n'? | '\n') -> channel(HIDDEN);

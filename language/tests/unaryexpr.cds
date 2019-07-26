@@ -1,7 +1,6 @@
 !true;
 !false;
-
-not true;
+not not true;
 not false;
-
 #list;
+!!flag;
