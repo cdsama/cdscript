@@ -1,3 +1,11 @@
 a.b;
 a.b.b;
+(1).tostring;
+1.0.tostring;
 1.tostring;
+this.tostring();
+a.b.b.get(key);
+a.b.c[key];
+a.b.c[1];
+a.b.c[d[1]];
+a.b.c[d[1]].x(1.tostring());

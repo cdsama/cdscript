@@ -33,7 +33,9 @@ type_identifier:
 	| ArrarIdentifier
 	| templateIdentifier;
 
-literal: Null | booleanliteral | numberliteral | Stringliteral;
+literal: Null | booleanliteral | numberliteral | Stringliteral
+	| This
+	| Super;
 
 Stringliteral: '"' Schar* '"';
 
@@ -84,20 +86,19 @@ assignment:
 	| const_modifier var_type '=' expression;
 
 expression:
-	primary_expression
+	literal
+	| callable_expression
 	| unary_operator expression
 	| expression multiplicative_operator expression
 	| expression additive_operator expression
 	| expression compare_operator expression;
 
-primary_expression:
-	literal
-	| This
-	| Super
-	| value;
-
-value: (Identifier | '(' expression ')' value_suffix) value_suffix*;
-value_suffix: '.' Identifier;
+callable_expression: call_able call_args*;
+call_able: index_able | '(' expression ')';
+index_able: (literal | Identifier | '(' expression ')' index_suffix) index_suffix*;
+index_suffix: call_args* ('[' expression ']' | '.' Identifier);
+call_args: '(' explist? ')';
+explist: expression (',' expression)*;
 
 unary_operator: Not | Sharp | PlusPlus | MinusMinus;
 multiplicative_operator: '*' | '/' | '%';
@@ -125,7 +126,7 @@ FloatingLiteral:
 	| HexadecimalFloatingLiteral;
 
 DecimalFloatingLiteral:
-	DIGIT+ '.' DIGIT* EXPONENT_PART?
+	DIGIT+ '.' DIGIT+ EXPONENT_PART?
 	| '.'? DIGIT+ EXPONENT_PART?
 	| DIGIT+ EXPONENT_PART;
 
