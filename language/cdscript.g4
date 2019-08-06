@@ -10,14 +10,15 @@ block: compound_statement | statement_sequence;
 
 compound_statement: '{' statement_sequence? '}';
 
-statement_sequence: statement+;
+statement_sequence: statement | (statement? statement_separator)+ statement?;
+
+statement_separator: (';'| Newline)+;
 
 statement:
-	';'
-	| expression ';'
-	| declare_variable ';'
-	| assignment ';'
-	| Return expression ';'
+	expression
+	| declare_variable
+	| assignment
+	| Return expression?
 	| compound_statement;
 
 declare_variable: var_modifier var_type (',' var_type)*;
@@ -33,9 +34,14 @@ type_identifier:
 	| ArrarIdentifier
 	| templateIdentifier;
 
-literal: Null | booleanliteral | numberliteral | Stringliteral
+literal:
+	Null
+	| booleanliteral
+	| numberliteral
+	| Stringliteral
 	| This
-	| Super;
+	| Super
+	| function_literal;
 
 Stringliteral: '"' Schar* '"';
 
@@ -83,7 +89,8 @@ numberliteral: IntegerLiteral | FloatingLiteral;
 assignment:
 	Identifier '=' expression
 	| declare_variable '=' expression
-	| const_modifier var_type '=' expression;
+	| const_modifier var_type '=' expression
+	| function_named;
 
 expression:
 	literal
@@ -95,10 +102,21 @@ expression:
 
 callable_expression: call_able call_args*;
 call_able: index_able | '(' expression ')';
-index_able: (literal | Identifier | '(' expression ')' index_suffix) index_suffix*;
+index_able: (
+		literal
+		| Identifier
+		| '(' expression ')' index_suffix
+	) index_suffix*;
 index_suffix: call_args* ('[' expression ']' | '.' Identifier);
 call_args: '(' explist? ')';
 explist: expression (',' expression)*;
+
+function_literal:
+	Fun '(' parameter_list? ')' compound_statement;
+
+function_named: Fun Identifier '(' parameter_list? ')' Newline* compound_statement;
+
+parameter_list: var_type | var_type (',' var_type)*;
 
 unary_operator: Not | Sharp | PlusPlus | MinusMinus;
 multiplicative_operator: '*' | '/' | '%';
@@ -169,8 +187,9 @@ Property: 'property';
 This: 'this';
 Super: 'super';
 Static: 'static';
-Return: 'return';
+Return: 'return' | 'ret';
 Not: 'not' | '!';
+Fun: 'fun';
 
 /* key words ↑ */
 
@@ -211,7 +230,7 @@ PlusPlus: '++';
 MinusMinus: '--';
 
 Whitespace: [ \t]+ -> channel(HIDDEN);
-Newline: ('\r' '\n'? | '\n') -> channel(HIDDEN);
+Newline: ('\r' '\n'? | '\n');
 BlockComment: '/*' .*? '*/' -> channel(HIDDEN);
 LineComment: '//' ~ [\r\n]* -> channel(HIDDEN);
 

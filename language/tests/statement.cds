@@ -1,8 +1,13 @@
 ;
-var a;
-a = 1;
+var a
+a = 1
+a = 2;
 {
-    var b = 0;
+    var b = 0
+    {
+    }
 }
 
-return a;
+a = 1; c = 2 
+
+return a
