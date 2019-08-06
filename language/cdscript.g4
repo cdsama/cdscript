@@ -10,9 +10,11 @@ block: compound_statement | statement_sequence;
 
 compound_statement: '{' statement_sequence? '}';
 
-statement_sequence: statement | (statement? statement_separator)+ statement?;
+statement_sequence:
+	statement
+	| (statement? statement_separator)+ statement?;
 
-statement_separator: (';'| Newline)+;
+statement_separator: (';' | Newline)+;
 
 statement:
 	expression
@@ -114,7 +116,8 @@ explist: expression (',' expression)*;
 function_literal:
 	Fun '(' parameter_list? ')' compound_statement;
 
-function_named: Fun Identifier '(' parameter_list? ')' Newline* compound_statement;
+function_named:
+	Fun Identifier '(' parameter_list? ')' Newline* compound_statement;
 
 parameter_list: var_type | var_type (',' var_type)*;
 
