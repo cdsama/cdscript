@@ -4,3 +4,4 @@ reference/
 vcpkg/
 .antlr/
 .idea/
+language/all.cds

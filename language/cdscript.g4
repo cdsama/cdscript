@@ -114,10 +114,10 @@ call_args: '(' explist? ')';
 explist: expression (',' expression)*;
 
 function_literal:
-	Fun '(' parameter_list? ')' compound_statement;
+	Function '(' parameter_list? ')' (':' type_identifier)? compound_statement;
 
 function_named:
-	Fun Identifier '(' parameter_list? ')' Newline* compound_statement;
+	Function Identifier '(' parameter_list? ')'(':' type_identifier)? Newline* compound_statement;
 
 parameter_list: var_type | var_type (',' var_type)*;
 
@@ -192,7 +192,7 @@ Super: 'super';
 Static: 'static';
 Return: 'return' | 'ret';
 Not: 'not' | '!';
-Fun: 'fun';
+Function: 'fn' | 'fun' | 'function';
 
 /* key words ↑ */
 
